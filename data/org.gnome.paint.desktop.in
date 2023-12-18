@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=paint
+Exec=paint
+Icon=org.gnome.paint
+Terminal=false
+Type=Application
+Categories=GTK;
+StartupNotify=true
