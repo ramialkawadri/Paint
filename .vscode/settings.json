@@ -6,6 +6,10 @@
         "adwaita.h": "c",
         "adw-application.h": "c",
         "adw-animation-util.h": "c",
-        "paint-application.h": "c"
-    }
+        "paint-application.h": "c",
+        "canvas-region.h": "c"
+    },
+
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true
 }

@@ -27,9 +27,9 @@ G_BEGIN_DECLS
 
 #define PAINT_TYPE_APPLICATION (paint_application_get_type())
 
-G_DECLARE_FINAL_TYPE (PaintApplication, paint_application, PAINT, APPLICATION, AdwApplication)
+G_DECLARE_FINAL_TYPE(PaintApplication, paint_application, PAINT, APPLICATION, AdwApplication)
 
-PaintApplication *paint_application_new (const char        *application_id,
-                                         GApplicationFlags  flags);
+PaintApplication *paint_application_new(const char *application_id,
+                                        GApplicationFlags flags);
 
 G_END_DECLS

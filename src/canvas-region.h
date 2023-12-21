@@ -21,12 +21,17 @@
 #pragma once
 
 #include <adwaita.h>
+#include "draw-event.h"
 
 G_BEGIN_DECLS
 
-#define PAINT_TYPE_CANVAS_REGION (canvas_region_get_type ())
+#define PAINT_TYPE_CANVAS_REGION (canvas_region_get_type())
 
-G_DECLARE_FINAL_TYPE (CanvasRegion, canvas_region, PAINT, CanvasRegion, GtkBox)
+G_DECLARE_FINAL_TYPE(CanvasRegion, canvas_region, PAINT, CANVAS_REGION, GtkBox)
 
 G_END_DECLS
 
+// Functions
+#define DRAW_FUNCTIONS_PARAMETERS (CanvasRegion * self, cairo_t * cr, DrawEvent * draw_event)
+typedef void(*on_draw_start_click) DRAW_FUNCTIONS_PARAMETERS;
+typedef void(*on_draw) DRAW_FUNCTIONS_PARAMETERS;

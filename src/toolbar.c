@@ -24,33 +24,32 @@
 
 struct _Toolbar
 {
-  GtkBox parent_type;
+    GtkBox parent_type;
 };
 
-G_DEFINE_FINAL_TYPE (Toolbar, toolbar, GTK_TYPE_BOX);
+G_DEFINE_FINAL_TYPE(Toolbar, toolbar, GTK_TYPE_BOX);
 
 static void
-toolbar_init (Toolbar *self)
+toolbar_init(Toolbar *self)
 {
-  gtk_widget_init_template (GTK_WIDGET (self));
+    gtk_widget_init_template(GTK_WIDGET(self));
 }
 
 static void
-toolbar_dispose (GObject *gobject)
+toolbar_dispose(GObject *gobject)
 {
-  gtk_widget_dispose_template (GTK_WIDGET (gobject), PAINT_TYPE_TOOLBAR);
+    gtk_widget_dispose_template(GTK_WIDGET(gobject), PAINT_TYPE_TOOLBAR);
 
-  G_OBJECT_CLASS (toolbar_parent_class)->dispose (gobject);
+    G_OBJECT_CLASS(toolbar_parent_class)->dispose(gobject);
 }
 
 static void
-toolbar_class_init (ToolbarClass *klass)
+toolbar_class_init(ToolbarClass *klass)
 {
-  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+    GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
 
-  gtk_widget_class_set_template_from_resource (widget_class,
-                                               "/org/gnome/paint/toolbar.ui");
+    gtk_widget_class_set_template_from_resource(widget_class,
+                                                "/org/gnome/paint/toolbar.ui");
 
-  G_OBJECT_CLASS (klass)->dispose = toolbar_dispose;
+    G_OBJECT_CLASS(klass)->dispose = toolbar_dispose;
 }
-

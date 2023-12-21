@@ -1,4 +1,4 @@
-/* toolbar.h
+/* brush.h
  *
  * Copyright 2023 Ramikw
  *
@@ -20,12 +20,9 @@
 
 #pragma once
 
-#include <adwaita.h>
+#include "canvas-region.h"
+#include "draw-event.h"
 
-G_BEGIN_DECLS
+void on_brush_draw_start_click DRAW_FUNCTIONS_PARAMETERS;
 
-#define PAINT_TYPE_TOOLBAR (toolbar_get_type())
-
-G_DECLARE_FINAL_TYPE(Toolbar, toolbar, PAINT, TOOLBAR, GtkBox)
-
-G_END_DECLS
+void on_brush_draw DRAW_FUNCTIONS_PARAMETERS;

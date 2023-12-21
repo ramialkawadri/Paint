@@ -1,4 +1,4 @@
-/* toolbar.h
+/* brush.c
  *
  * Copyright 2023 Ramikw
  *
@@ -18,14 +18,24 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#pragma once
+#include "brush.h"
 
-#include <adwaita.h>
+void on_brush_draw_start_click(CanvasRegion *self,
+                               cairo_t *cr,
+                               DrawEvent *draw_event)
+{
+    cairo_arc(cr, draw_event->current_x, draw_event->current_y, 1, 0, 2 * G_PI);
+    cairo_fill(cr);
+}
 
-G_BEGIN_DECLS
-
-#define PAINT_TYPE_TOOLBAR (toolbar_get_type())
-
-G_DECLARE_FINAL_TYPE(Toolbar, toolbar, PAINT, TOOLBAR, GtkBox)
-
-G_END_DECLS
+void on_brush_draw(CanvasRegion *self,
+                   cairo_t *cr,
+                   DrawEvent *draw_event)
+{
+    if (draw_event->last_x != -1 && draw_event->last_y != -1)
+    {
+        cairo_move_to(cr, draw_event->last_x, draw_event->last_y);
+        cairo_line_to(cr, draw_event->current_x, draw_event->current_y);
+        cairo_stroke(cr);
+    }
+}

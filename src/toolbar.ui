@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <template class="Toolbar" parent="GtkBox">
-    <property name="orientation">horizontal</property>
-
-    <child>
-      <object class="GtkBox">
-        <property name="orientation">vertical</property>
+    <template class="Toolbar" parent="GtkBox">
+        <property name="orientation">horizontal</property>
 
         <child>
-          <object class="GtkButton">
-            <property name="child">
-              <object class="AdwButtonContent">
-                <property name="icon-name">document-open-symbolic</property>
-                <property name="label" translatable="yes">_Open</property>
-                <property name="use-underline">True</property>
-              </object>
-            </property>
-          </object>
+            <object class="GtkBox">
+                <property name="orientation">vertical</property>
+
+                <child>
+                    <object class="GtkButton">
+                        <property name="child">
+                            <object class="AdwButtonContent">
+                                <property name="icon-name">document-open-symbolic</property>
+                                <property name="label" translatable="yes">_Open</property>
+                                <property name="use-underline">True</property>
+                            </object>
+                        </property>
+                    </object>
+                </child>
+
+                <child>
+                    <object class="GtkButton">
+                        <property name="child">
+                            <object class="AdwButtonContent">
+                                <property name="icon-name">text-editor-symbolic</property>
+                                <property name="label" translatable="yes">_Save</property>
+                                <property name="use-underline">True</property>
+                            </object>
+                        </property>
+                    </object>
+                </child>
+
+            </object>
         </child>
 
-        <child>
-          <object class="GtkButton">
-            <property name="child">
-              <object class="AdwButtonContent">
-                <property name="icon-name">text-editor-symbolic</property>
-                <property name="label" translatable="yes">_Save</property>
-                <property name="use-underline">True</property>
-              </object>
-            </property>
-          </object>
-        </child>
-
-      </object>
-    </child>
-
-    <style>
-      <class name="toolbar" />
-      <class name="frame" />
-    </style>
-  </template>
+        <style>
+            <class name="toolbar" />
+            <class name="frame" />
+        </style>
+    </template>
 </interface>

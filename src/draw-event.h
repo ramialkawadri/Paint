@@ -1,4 +1,4 @@
-/* toolbar.h
+/* draw-event.h
  *
  * Copyright 2023 Ramikw
  *
@@ -20,12 +20,19 @@
 
 #pragma once
 
-#include <adwaita.h>
+struct DrawEvent
+{
+    gdouble start_x;
+    gdouble start_y;
 
-G_BEGIN_DECLS
+    gdouble offset_x;
+    gdouble offset_y;
 
-#define PAINT_TYPE_TOOLBAR (toolbar_get_type())
+    gdouble last_x;
+    gdouble last_y;
 
-G_DECLARE_FINAL_TYPE(Toolbar, toolbar, PAINT, TOOLBAR, GtkBox)
+    gdouble current_x;
+    gdouble current_y;
+};
 
-G_END_DECLS
+typedef struct DrawEvent DrawEvent;
