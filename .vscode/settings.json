@@ -1,6 +1,11 @@
 {
     "files.associations": {
         "toolbar.h": "c",
-        "paint-window.h": "c"
+        "paint-window.h": "c",
+        "config.h": "c",
+        "adwaita.h": "c",
+        "adw-application.h": "c",
+        "adw-animation-util.h": "c",
+        "paint-application.h": "c"
     }
 }

@@ -1,0 +1,13 @@
+.toolbar {
+  min-height: 3em;
+}
+
+.canvas-region {
+    background-color: rgb(222, 222, 222);
+}
+
+
+.drawing-area {
+    box-shadow: rgba(0, 0, 0, 0.12) 8px 8px 8px;
+    background-color: white;
+}

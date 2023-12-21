@@ -22,6 +22,7 @@
 
 #include "paint-window.h"
 #include "toolbar.h"
+#include "canvas-region.h"
 
 struct _PaintWindow
 {
@@ -43,6 +44,7 @@ paint_window_class_init (PaintWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, PaintWindow, header_bar);
   gtk_widget_class_bind_template_child (widget_class, PaintWindow, toolbar);
 
+  g_type_ensure (PAINT_TYPE_CANVAS_REGION);
   g_type_ensure (PAINT_TYPE_TOOLBAR);
 }
 

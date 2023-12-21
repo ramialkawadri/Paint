@@ -1,4 +1,4 @@
-/* toolbar.h
+/* canvas-region.h
  *
  * Copyright 2023 Ramikw
  *
@@ -24,9 +24,9 @@
 
 G_BEGIN_DECLS
 
-#define PAINT_TYPE_TOOLBAR (toolbar_get_type ())
+#define PAINT_TYPE_CANVAS_REGION (canvas_region_get_type ())
 
-G_DECLARE_FINAL_TYPE (Toolbar, toolbar, PAINT, TOOLBAR, GtkBox)
+G_DECLARE_FINAL_TYPE (CanvasRegion, canvas_region, PAINT, CanvasRegion, GtkBox)
 
 G_END_DECLS
 
