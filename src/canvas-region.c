@@ -28,42 +28,44 @@
 struct _CanvasRegion
 {
   /* Widgets */
-  GtkBox parent_type;
-  GtkDrawingArea *drawing_area;
-  Toolbar *toolbar;
+  GtkBox              parent_type;
+  GtkDrawingArea     *drawing_area;
+  Toolbar            *toolbar;
 
   /* Controllers */
-  GtkGestureDrag *gesture_drag;
-  GtkGestureClick *gesture_click;
+  GtkGestureDrag     *gesture_drag;
+  GtkGestureClick    *gesture_click;
 
   /* Draw */
-  DrawEvent draw_event;
-  cairo_surface_t *cairo_surface;
+  DrawEvent           draw_event;
+  cairo_surface_t    *cairo_surface;
 
   /* Callbacks */
   on_draw_start_click draw_start_click_cb;
-  on_draw draw_cb;
+  on_draw             draw_cb;
 
   /* Metadata */
-  int width;
-  int height;
-  char *current_file_path;
-  gboolean is_current_file_saved;
+  int                 width;
+  int                 height;
+  char               *current_file_path;
+  gboolean            is_current_file_saved;
 };
 
 G_DEFINE_FINAL_TYPE (CanvasRegion, canvas_region, GTK_TYPE_BOX);
 
-void
+static void
 update_draw_event_from_toolbar (CanvasRegion *self)
 {
   self->draw_event.draw_size = toolbar_get_draw_size (self->toolbar);
 }
 
-void
+static void
 prompt_to_save_current_file (CanvasRegion *self)
 {
   GtkWidget *dialog;
-  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET(self));
+  GtkRoot *root;
+
+  root = gtk_widget_get_root (GTK_WIDGET(self));
 
   dialog = adw_message_dialog_new (GTK_WINDOW(root),
                                    "Save changes?",
@@ -88,16 +90,25 @@ prompt_to_save_current_file (CanvasRegion *self)
   // TODO: connect the response to open file function!
 }
 
-void
+static void
 on_file_open (GObject      *source_object,
               GAsyncResult *res,
               gpointer      data)
 {
-  CanvasRegion *self = data;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GFile) file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(source_object),
-                                                       res,
-                                                       &error);
+  CanvasRegion *self;
+  g_autoptr (GError) error;
+  g_autoptr (GFile) file;
+  char *filename;
+  int width;
+  int height;
+  int stride;
+  cairo_format_t format;
+  GdkPixbuf *pixbuf;
+  guchar *pixels;
+
+  self = data;
+  error = NULL;
+  file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(source_object), res, &error);
 
   if (error != NULL)
     {
@@ -111,20 +122,19 @@ on_file_open (GObject      *source_object,
       self->is_current_file_saved = true;
     }
 
-  char *filename = g_file_get_path (file);
-  GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file (filename, &error);
+  filename = g_file_get_path (file);
+  pixbuf = gdk_pixbuf_new_from_file (filename, &error);
 
-  int width = gdk_pixbuf_get_width (pixbuf);
-  int height = gdk_pixbuf_get_height (pixbuf);
+  width = gdk_pixbuf_get_width (pixbuf);
+  height = gdk_pixbuf_get_height (pixbuf);
 
-  cairo_format_t format = gdk_pixbuf_get_has_alpha (pixbuf) ?
-                            CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB30;
+  format = gdk_pixbuf_get_has_alpha (pixbuf) ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB30;
 
-  int stride = cairo_format_stride_for_width (format, width);
+  stride = cairo_format_stride_for_width (format, width);
 
   cairo_surface_destroy (self->cairo_surface);
 
-  guchar *pixels = gdk_pixbuf_get_pixels (pixbuf);
+  pixels = gdk_pixbuf_get_pixels (pixbuf);
 
   self->width = width;
   self->height = height;
@@ -142,16 +152,23 @@ on_file_open (GObject      *source_object,
   gtk_widget_queue_draw (GTK_WIDGET(self->drawing_area));
 }
 
-void
+static void
 on_file_save (GObject      *source_object,
               GAsyncResult *res,
               gpointer      data)
 {
-  CanvasRegion *self = data;
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GFile) file = gtk_file_dialog_save_finish(GTK_FILE_DIALOG(source_object),
-                                                       res,
-                                                       &error);
+  CanvasRegion *self;
+  g_autoptr (GError) error;
+  g_autoptr (GFile) file;
+  char *filename;
+  unsigned char *pixels;
+  int stride;
+  GdkPixbuf *pixbuf;
+  gboolean is_saved;
+
+  self = data;
+  error = NULL;
+  file = gtk_file_dialog_save_finish (GTK_FILE_DIALOG(source_object), res, &error);
 
   if (error != NULL)
     {
@@ -159,22 +176,21 @@ on_file_save (GObject      *source_object,
       return;
     }
 
-  char *filename = g_file_get_path (file);
+  filename = g_file_get_path (file);
 
-  unsigned char *pixels = cairo_image_surface_get_data (self->cairo_surface);
+  pixels = cairo_image_surface_get_data (self->cairo_surface);
 
-  int stride = cairo_image_surface_get_stride (self->cairo_surface);
+  stride = cairo_image_surface_get_stride (self->cairo_surface);
 
-  GdkPixbuf *pixbuf = gdk_pixbuf_new_from_data (pixels,
-                                                GDK_COLORSPACE_RGB,
-                                                1,
-                                                8,
-                                                self->width,
-                                                self->height,
-                                                stride,
-                                                NULL, NULL);
+  pixbuf = gdk_pixbuf_new_from_data (pixels,
+                                     GDK_COLORSPACE_RGB,
+                                     1, 8,
+                                     self->width,
+                                     self->height,
+                                     stride,
+                                     NULL, NULL);
 
-  gboolean is_saved = gdk_pixbuf_save (pixbuf, filename, "png", NULL, NULL);
+  is_saved = gdk_pixbuf_save (pixbuf, filename, "png", NULL, NULL);
 
   self->is_current_file_saved = is_saved;
 }
@@ -208,8 +224,10 @@ on_mouse_press (GtkGestureClick *gesture,
                 gdouble          y,
                 gpointer         user_data)
 {
-  CanvasRegion *self = user_data;
+  CanvasRegion *self;
   cairo_t *cr;
+
+  self = user_data;
 
   if (self->draw_start_click_cb == NULL)
     {
@@ -255,8 +273,11 @@ on_gesture_drag_update (GtkGestureDrag *gesture,
                         gdouble         offset_y,
                         gpointer        user_data)
 {
-  CanvasRegion *self = user_data;
-  cairo_t *cr = cairo_create (self->cairo_surface);
+  CanvasRegion *self;
+  cairo_t *cr;
+
+  self = user_data;
+  cr = cairo_create (self->cairo_surface);
 
   self->draw_event.offset_x = offset_x;
   self->draw_event.offset_y = offset_y;
@@ -343,7 +364,7 @@ canvas_region_class_init (CanvasRegionClass *klass)
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
   gtk_widget_class_set_template_from_resource (widget_class,
-                                               "/org/gnome/paint/canvas-region.ui");
+                                               "/org/gnome/paint/ui/canvas-region.ui");
 
   gtk_widget_class_bind_template_child (widget_class, CanvasRegion, drawing_area);
   gtk_widget_class_bind_template_child (widget_class, CanvasRegion, gesture_drag);

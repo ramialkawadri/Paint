@@ -33,7 +33,7 @@ on_brush_draw_start_click (CanvasRegion *self,
   cairo_fill (cr);
 }
 
-gdouble
+static gdouble
 get_next_point_on_line_with_distance_d (gdouble m,
                                         gdouble b,
                                         gdouble x0,
@@ -44,19 +44,33 @@ get_next_point_on_line_with_distance_d (gdouble m,
 /**
  * Draw a line from last drawn point, it moves along the x axis
  */
-void
+static void
 draw_along_x_axis (cairo_t   *cr,
                    DrawEvent *draw_event)
 {
-  gdouble delta_x = draw_event->current_x - draw_event->last_x;
-  gdouble delta_y = draw_event->current_y - draw_event->last_y;
+  gdouble delta_x;
+  gdouble delta_y;
 
-  gdouble m = delta_y / delta_x;
-  gdouble b = draw_event->current_y - m * draw_event->current_x;
+  gdouble m;
+  gdouble b;
 
-  gdouble x = draw_event->last_x;
-  gdouble y = draw_event->last_y;
-  gdouble end_x = draw_event->current_x;
+  gdouble x;
+  gdouble y;
+  gdouble end_x;
+  
+  gdouble r;
+
+  delta_x = draw_event->current_x - draw_event->last_x;
+  delta_y = draw_event->current_y - draw_event->last_y;
+
+  m = delta_y / delta_x;
+  b = draw_event->current_y - m * draw_event->current_x;
+
+  x = draw_event->last_x;
+  y = draw_event->last_y;
+  end_x = draw_event->current_x;
+   
+  r = draw_event->draw_size;
 
   if (draw_event->last_x > draw_event->current_x)
     {
@@ -65,8 +79,6 @@ draw_along_x_axis (cairo_t   *cr,
 
       end_x = draw_event->last_x;
     }
-
-  gdouble r = draw_event->draw_size;
 
   while (x <= end_x)
     {
@@ -81,19 +93,33 @@ draw_along_x_axis (cairo_t   *cr,
 /**
  * Draw a line from last drawn point, it moves along the y axis
  */
-void
+static void
 draw_along_y_axis (cairo_t   *cr,
                    DrawEvent *draw_event)
 {
-  gdouble delta_x = draw_event->current_x - draw_event->last_x;
-  gdouble delta_y = draw_event->current_y - draw_event->last_y;
+  gdouble delta_x;
+  gdouble delta_y;
 
-  gdouble m = delta_x / delta_y;
-  gdouble b = draw_event->current_x - m * draw_event->current_y;
+  gdouble m;
+  gdouble b;
 
-  gdouble x = draw_event->last_x;
-  gdouble y = draw_event->last_y;
-  gdouble end_y = draw_event->current_y;
+  gdouble x;
+  gdouble y;
+  gdouble end_y;
+
+  gdouble r;
+
+  delta_x = draw_event->current_x - draw_event->last_x;
+  delta_y = draw_event->current_y - draw_event->last_y;
+
+  m = delta_x / delta_y;
+  b = draw_event->current_x - m * draw_event->current_y;
+
+  x = draw_event->last_x;
+  y = draw_event->last_y;
+  end_y = draw_event->current_y;
+
+  r = draw_event->draw_size;
 
   if (draw_event->last_y > draw_event->current_y)
     {
@@ -102,8 +128,6 @@ draw_along_y_axis (cairo_t   *cr,
 
       end_y = draw_event->last_y;
     }
-
-  gdouble r = draw_event->draw_size;
 
   while (y <= end_y)
     {
@@ -120,11 +144,14 @@ on_brush_draw (CanvasRegion *self,
                cairo_t      *cr,
                DrawEvent    *draw_event)
 {
+  gdouble delta_x;
+  gdouble delta_y;
+
   if (draw_event->last_x == -1 || draw_event->last_y == -1)
     return;
 
-  gdouble delta_x = ABS (draw_event->current_x - draw_event->last_x);
-  gdouble delta_y = ABS (draw_event->current_y - draw_event->last_y);
+  delta_x = ABS (draw_event->current_x - draw_event->last_x);
+  delta_y = ABS (draw_event->current_y - draw_event->last_y);
 
   if (delta_x < delta_y)
     draw_along_y_axis (cr, draw_event);

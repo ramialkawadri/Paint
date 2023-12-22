@@ -20,7 +20,7 @@
 
 #pragma once
 
-struct DrawEvent
+typedef struct _DrawEvent
 {
   gdouble start_x;
   gdouble start_y;
@@ -35,6 +35,4 @@ struct DrawEvent
   gdouble current_y;
 
   gdouble draw_size;
-};
-
-typedef struct DrawEvent DrawEvent;
+} DrawEvent;

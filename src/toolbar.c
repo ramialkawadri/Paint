@@ -25,16 +25,15 @@
 struct _Toolbar
 {
   /* Widgets */
-  GtkBox parent_type;
+  GtkBox                parent_type;
   GtkColorDialogButton *color_button;
-  GtkSpinButton *spin_button;
+  GtkSpinButton        *spin_button;
 
   /* Callbacks */
-  GAsyncReadyCallback on_file_open_cb;
-  gpointer file_open_user_data;
-
-  GAsyncReadyCallback on_file_save_cb;
-  gpointer file_save_user_data;
+  GAsyncReadyCallback   on_file_open_cb;
+  gpointer              file_open_user_data;
+  GAsyncReadyCallback   on_file_save_cb;
+  gpointer              file_save_user_data;
 };
 
 G_DEFINE_FINAL_TYPE (Toolbar, toolbar, GTK_TYPE_BOX);
@@ -43,13 +42,17 @@ static void
 on_open_button_click (GtkButton *button,
                       gpointer   user_data)
 {
-  Toolbar *self = user_data;
+  Toolbar *self;
+  GtkRoot *root;
 
-  g_autoptr (GtkFileDialog) file_dialog = gtk_file_dialog_new();
+  g_autoptr (GtkFileDialog) file_dialog;
+  g_autoptr (GtkFileFilter) file_filter;
 
-  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET(self));
+  self = (Toolbar *) user_data;
+  root = gtk_widget_get_root (GTK_WIDGET(self));
 
-  g_autoptr (GtkFileFilter) file_filter = gtk_file_filter_new();
+  file_dialog = gtk_file_dialog_new ();
+  file_filter = gtk_file_filter_new ();
 
   gtk_file_filter_add_mime_type (file_filter, "image/*");
 
@@ -66,13 +69,17 @@ static void
 on_save_button_click (GtkButton *button,
                       gpointer   user_data)
 {
-  Toolbar *self = user_data;
+  Toolbar *self;
+  GtkRoot *root;
 
-  g_autoptr (GtkFileDialog) file_dialog = gtk_file_dialog_new();
+  g_autoptr (GtkFileDialog) file_dialog;
+  g_autoptr (GtkFileFilter) file_filter;
 
-  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET(self));
+  self = user_data;
+  root = gtk_widget_get_root (GTK_WIDGET(self));
 
-  g_autoptr (GtkFileFilter) file_filter = gtk_file_filter_new();
+  file_dialog = gtk_file_dialog_new ();
+  file_filter = gtk_file_filter_new ();
 
   gtk_file_filter_add_mime_type (file_filter, "image/*");
 
@@ -146,7 +153,7 @@ toolbar_class_init (ToolbarClass *klass)
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
   gtk_widget_class_set_template_from_resource (widget_class,
-                                               "/org/gnome/paint/toolbar.ui");
+                                               "/org/gnome/paint/ui/toolbar.ui");
 
   gtk_widget_class_bind_template_child (widget_class, Toolbar, color_button);
   gtk_widget_class_bind_template_child (widget_class, Toolbar, spin_button);
