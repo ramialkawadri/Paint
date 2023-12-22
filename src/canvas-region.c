@@ -25,6 +25,11 @@
 
 #include "toolbar.h"
 
+typedef struct _CanvasRegionUserData {
+  CanvasRegion *self;
+  gpointer      user_data;
+} CanvasRegionUserData;
+
 struct _CanvasRegion
 {
   /* Widgets */
@@ -47,7 +52,7 @@ struct _CanvasRegion
   /* Metadata */
   int                 width;
   int                 height;
-  char               *current_file_path;
+  char               *current_filename;
   gboolean            is_current_file_saved;
 };
 
@@ -60,45 +65,36 @@ update_draw_event_from_toolbar (CanvasRegion *self)
 }
 
 static void
-prompt_to_save_current_file (CanvasRegion *self)
+save_canvas (CanvasRegion *self)
 {
-  GtkWidget *dialog;
-  GtkRoot *root;
+  unsigned char *pixels;
+  GdkPixbuf *pixbuf;
+  gboolean is_saved;
+  int stride;
 
-  root = gtk_widget_get_root (GTK_WIDGET(self));
+  // TODO: saving doesn't save colors correctly
+  pixels = cairo_image_surface_get_data (self->cairo_surface);
 
-  dialog = adw_message_dialog_new (GTK_WINDOW(root),
-                                   "Save changes?",
-                                   "Your current file contains unsaved changes!");
+  stride = cairo_image_surface_get_stride (self->cairo_surface);
 
-  adw_message_dialog_add_responses (ADW_MESSAGE_DIALOG(dialog),
-                                    "cancel", "_Cancel",
-                                    "discard", "_Discard",
-                                    "save", "_Save",
-                                    NULL);
+  pixbuf = gdk_pixbuf_new_from_data (pixels,
+                                     GDK_COLORSPACE_RGB,
+                                     0, 8,
+                                     self->width,
+                                     self->height,
+                                     stride,
+                                     NULL, NULL);
 
-  adw_message_dialog_set_response_appearance (ADW_MESSAGE_DIALOG(dialog),
-                                              "discard",
-                                              ADW_RESPONSE_DESTRUCTIVE);
+  is_saved = gdk_pixbuf_save (pixbuf, self->current_filename, "png", NULL, NULL);
 
-  adw_message_dialog_set_response_appearance (ADW_MESSAGE_DIALOG(dialog),
-                                              "save",
-                                              ADW_RESPONSE_SUGGESTED);
-
-  gtk_window_present (GTK_WINDOW(dialog));
-
-  // TODO: connect the response to open file function!
+  self->is_current_file_saved = is_saved;
 }
 
 static void
-on_file_open (GObject      *source_object,
-              GAsyncResult *res,
-              gpointer      data)
+load_file (CanvasRegion *self,
+           char         *filename)
 {
-  CanvasRegion *self;
   g_autoptr (GError) error;
-  g_autoptr (GFile) file;
-  char *filename;
   int width;
   int height;
   int stride;
@@ -106,29 +102,17 @@ on_file_open (GObject      *source_object,
   GdkPixbuf *pixbuf;
   guchar *pixels;
 
-  self = data;
+  // TODO: opening doesn't load colors correctly
   error = NULL;
-  file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(source_object), res, &error);
 
-  if (error != NULL)
-    {
-      g_message ("Error opening file: %s", error->message);
-      return;
-    }
+  self->current_filename = filename;
 
-  if (!self->is_current_file_saved)
-    {
-      prompt_to_save_current_file (self);
-      self->is_current_file_saved = true;
-    }
-
-  filename = g_file_get_path (file);
   pixbuf = gdk_pixbuf_new_from_file (filename, &error);
 
   width = gdk_pixbuf_get_width (pixbuf);
   height = gdk_pixbuf_get_height (pixbuf);
 
-  format = gdk_pixbuf_get_has_alpha (pixbuf) ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB30;
+  format = gdk_pixbuf_get_has_alpha (pixbuf) ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24;
 
   stride = cairo_format_stride_for_width (format, width);
 
@@ -138,7 +122,7 @@ on_file_open (GObject      *source_object,
 
   self->width = width;
   self->height = height;
-  self->current_file_path = filename;
+  self->current_filename = filename;
 
   gtk_drawing_area_set_content_width (self->drawing_area, width);
   gtk_drawing_area_set_content_height (self->drawing_area, height);
@@ -153,6 +137,98 @@ on_file_open (GObject      *source_object,
 }
 
 static void
+prompt_to_save_current_file (CanvasRegion *self,
+                             GCallback     on_response,
+                             gpointer      user_data)
+{
+  GtkWidget *dialog;
+  GtkRoot *root;
+
+  root = gtk_widget_get_root (GTK_WIDGET(self));
+
+  dialog = adw_message_dialog_new (GTK_WINDOW(root),
+                                   "Save changes?",
+                                   "Your current file contains unsaved changes!");
+
+  adw_message_dialog_add_responses (ADW_MESSAGE_DIALOG(dialog),
+                                    "cancel", "Cancel",
+                                    "discard", "Discard",
+                                    "save", "Save",
+                                    NULL);
+
+  adw_message_dialog_set_response_appearance (ADW_MESSAGE_DIALOG(dialog),
+                                              "discard",
+                                              ADW_RESPONSE_DESTRUCTIVE);
+
+  adw_message_dialog_set_response_appearance (ADW_MESSAGE_DIALOG(dialog),
+                                              "save",
+                                              ADW_RESPONSE_SUGGESTED);
+
+  g_signal_connect (dialog, "response", on_response, user_data);
+
+  gtk_window_present (GTK_WINDOW(dialog));
+}
+
+static void
+on_prompt_to_save_response_file_open (AdwMessageDialog *dialog,
+                                      gchar            *response,
+                                      gpointer          user_data)
+{
+  CanvasRegionUserData *cb_data = user_data;
+
+  if (g_strcmp0 (response, "cancel") == 0)
+    {
+      g_free (cb_data);
+      return;
+    }
+  else if (g_strcmp0 (response, "save") == 0)
+    {
+      save_canvas (cb_data->self);
+    }
+
+  cb_data->self->is_current_file_saved = true;
+  load_file (cb_data->self, cb_data->user_data);
+  g_free (cb_data);
+}
+
+static void
+on_file_open (GObject      *source_object,
+              GAsyncResult *res,
+              gpointer      data)
+{
+  CanvasRegion *self;
+  CanvasRegionUserData *cb_data;
+  g_autoptr (GError) error;
+  g_autoptr (GFile) file;
+  char *filename;
+
+  self = data;
+  error = NULL;
+  file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(source_object), res, &error);
+
+  if (error != NULL)
+    {
+      g_message ("Error opening file: %s", error->message);
+      return;
+    }
+
+  filename = g_file_get_path (file);
+
+  if (!self->is_current_file_saved)
+    {
+      cb_data = g_malloc (sizeof (CanvasRegionUserData));
+      cb_data->self = self;
+      cb_data->user_data = filename;
+
+      prompt_to_save_current_file (self, G_CALLBACK (on_prompt_to_save_response_file_open), cb_data);
+    }
+  else
+    {
+      load_file (self, filename);
+    }
+}
+
+static void
 on_file_save (GObject      *source_object,
               GAsyncResult *res,
               gpointer      data)
@@ -160,11 +236,7 @@ on_file_save (GObject      *source_object,
   CanvasRegion *self;
   g_autoptr (GError) error;
   g_autoptr (GFile) file;
-  char *filename;
-  unsigned char *pixels;
-  int stride;
-  GdkPixbuf *pixbuf;
-  gboolean is_saved;
+  char *filepath;
 
   self = data;
   error = NULL;
@@ -176,23 +248,10 @@ on_file_save (GObject      *source_object,
       return;
     }
 
-  filename = g_file_get_path (file);
+  filepath = g_file_get_path (file);
+  self->current_filename = filepath;
 
-  pixels = cairo_image_surface_get_data (self->cairo_surface);
-
-  stride = cairo_image_surface_get_stride (self->cairo_surface);
-
-  pixbuf = gdk_pixbuf_new_from_data (pixels,
-                                     GDK_COLORSPACE_RGB,
-                                     1, 8,
-                                     self->width,
-                                     self->height,
-                                     stride,
-                                     NULL, NULL);
-
-  is_saved = gdk_pixbuf_save (pixbuf, filename, "png", NULL, NULL);
-
-  self->is_current_file_saved = is_saved;
+  save_canvas (self);
 }
 
 static void
@@ -304,6 +363,9 @@ on_gesture_drag_end (GtkGestureDrag *gesture,
                      gdouble         offset_y,
                      gpointer        user_data)
 {
+  CanvasRegion *self = user_data;
+
+  self->is_current_file_saved = false;
 }
 
 void

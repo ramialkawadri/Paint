@@ -29,7 +29,7 @@ on_brush_draw_start_click (CanvasRegion *self,
              draw_event->current_x,
              draw_event->current_y,
              draw_event->draw_size,
-            0, 2 * G_PI);
+             0, 2 * G_PI);
   cairo_fill (cr);
 }
 

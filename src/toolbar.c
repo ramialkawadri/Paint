@@ -69,6 +69,7 @@ static void
 on_save_button_click (GtkButton *button,
                       gpointer   user_data)
 {
+  // TODO: move to canvas-region
   Toolbar *self;
   GtkRoot *root;
 

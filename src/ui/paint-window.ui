@@ -29,7 +29,7 @@
                         <child>
                             <object class="Toolbar" id="toolbar" />
                         </child>
-
+                        
                         <child>
                             <object class="GtkScrolledWindow">
                                 <property name="child">
