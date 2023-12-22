@@ -57,4 +57,8 @@ paint_window_init(PaintWindow *self)
     gtk_widget_init_template(GTK_WIDGET(self));
 
     canvas_region_set_toolbar(self->canvas_region, self->toolbar);
+
+    toolbar_set_file_open_cb(self->toolbar,
+                             canvas_region_get_file_open_callback(self->canvas_region));
+    toolbar_set_file_open_user_data(self->toolbar, self->canvas_region);
 }

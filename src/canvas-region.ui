@@ -3,13 +3,13 @@
     <template class="CanvasRegion" parent="GtkBox">
         <property name="orientation">horizontal</property>
         <property name="vexpand">true</property>
+        <property name="hexpand">true</property>
 
         <child>
             <object class="GtkDrawingArea" id="drawing_area">
                 <property name="content-width">800</property>
                 <property name="content-height">400</property>
                 <property name="valign">start</property>
-                <signal name="resize" handler="on_resize" object="CanvasRegion" swapped="no" />
 
                 <child>
                     <object class="GtkGestureClick" id="gesture_click">

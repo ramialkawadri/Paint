@@ -106,7 +106,6 @@ void draw_along_y_axis(cairo_t *cr,
 
         y = get_next_point_on_line_with_distance_d(m, b, y, r / 2);
         x = m * y + b;
-        g_message("x: %f", x);
     }
 }
 

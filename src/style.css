@@ -1,5 +1,6 @@
 .toolbar {
     min-height: 3.2em;
+    border-width: 2px;
 }
 
 .ColorButtonContainer {
@@ -12,5 +13,4 @@
 
 .drawing-area {
     box-shadow: rgba(0, 0, 0, 0.12) 8px 8px 8px;
-    background-color: white;
 }

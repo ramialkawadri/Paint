@@ -43,6 +43,12 @@ struct _CanvasRegion
     /* Callbacks */
     on_draw_start_click draw_start_click_cb;
     on_draw draw_cb;
+
+    /* Metadata */
+    int width;
+    int height;
+    char *current_file_path;
+    gboolean is_current_file_saved;
 };
 
 G_DEFINE_FINAL_TYPE(CanvasRegion, canvas_region, GTK_TYPE_BOX);
@@ -50,6 +56,85 @@ G_DEFINE_FINAL_TYPE(CanvasRegion, canvas_region, GTK_TYPE_BOX);
 void update_draw_event_from_toolbar(CanvasRegion *self)
 {
     self->draw_event.draw_size = toolbar_get_draw_size(self->toolbar);
+}
+
+void prompt_to_save_current_file(CanvasRegion *self)
+{
+    GtkWidget *dialog;
+    GtkRoot *root = gtk_widget_get_root(GTK_WIDGET(self));
+
+    dialog = adw_message_dialog_new(GTK_WINDOW(root),
+                                    "Save changes?",
+                                    "Your current file contains unsaved changes!");
+
+    adw_message_dialog_add_responses(ADW_MESSAGE_DIALOG(dialog),
+                                     "cancel", "_Cancel",
+                                     "discard", "_Discard",
+                                     "save", "_Save",
+                                     NULL);
+
+    adw_message_dialog_set_response_appearance(ADW_MESSAGE_DIALOG(dialog),
+                                               "discard",
+                                               ADW_RESPONSE_DESTRUCTIVE);
+
+    adw_message_dialog_set_response_appearance(ADW_MESSAGE_DIALOG(dialog),
+                                               "save",
+                                               ADW_RESPONSE_SUGGESTED);
+
+    gtk_window_present(GTK_WINDOW(dialog));
+
+    // TODO: connect the response to open file function!
+}
+
+void on_file_open(GObject *source_object,
+                  GAsyncResult *res,
+                  gpointer data)
+{
+    CanvasRegion *self = data;
+    g_autoptr(GError) error = NULL;
+    g_autoptr(GFile) file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(source_object),
+                                                        res,
+                                                        &error);
+
+    if (error)
+    {
+        g_message("Error opening file: %s", error->message);
+        return;
+    }
+
+    if (!self->is_current_file_saved)
+    {
+        prompt_to_save_current_file(self);
+        self->is_current_file_saved = true;
+    }
+
+    char *filename = g_file_get_path(file);
+    GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(filename, &error);
+
+    int width = gdk_pixbuf_get_width(pixbuf);
+    int height = gdk_pixbuf_get_height(pixbuf);
+    int stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width);
+    cairo_format_t format = gdk_pixbuf_get_has_alpha(pixbuf) ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24;
+
+    cairo_surface_destroy(self->cairo_surface);
+
+    guchar *pixels = gdk_pixbuf_get_pixels(pixbuf);
+
+    self->width = width;
+    self->height = height;
+    self->current_file_path = filename;
+
+    self->cairo_surface = cairo_image_surface_create_for_data(pixels,
+                                                              format,
+                                                              width,
+                                                              height,
+                                                              stride);
+
+    gtk_drawing_area_set_content_width(self->drawing_area, width);
+    gtk_drawing_area_set_content_height(self->drawing_area, height);
+
+    gtk_widget_queue_draw(GTK_WIDGET(self->drawing_area));
+    gtk_widget_queue_draw(GTK_WIDGET(self->drawing_area));
 }
 
 static void
@@ -65,13 +150,9 @@ draw_function(GtkDrawingArea *area,
 }
 
 static void
-on_resize(GtkWidget *widget,
-          int width,
-          int height,
-          gpointer user_data)
+make_surface_white(cairo_surface_t *cairo_surface)
 {
-    CanvasRegion *self = user_data;
-    cairo_t *cr = cairo_create(self->cairo_surface);
+    cairo_t *cr = cairo_create(cairo_surface);
 
     cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
     cairo_paint(cr);
@@ -167,12 +248,24 @@ void canvas_region_set_toolbar(CanvasRegion *self, Toolbar *toolbar)
     self->toolbar = toolbar;
 }
 
+GAsyncReadyCallback
+canvas_region_get_file_open_callback(CanvasRegion *self)
+{
+    return on_file_open;
+}
+
 static void
 canvas_region_init(CanvasRegion *self)
 {
     gtk_widget_init_template(GTK_WIDGET(self));
 
-    self->cairo_surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, 800, 400);
+    self->width = gtk_drawing_area_get_content_width(self->drawing_area);
+    self->height = gtk_drawing_area_get_content_height(self->drawing_area);
+
+    self->cairo_surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24,
+                                                     self->width,
+                                                     self->height);
+    make_surface_white(self->cairo_surface);
 
     self->draw_start_click_cb = &on_brush_draw_start_click;
     self->draw_cb = &on_brush_draw;
@@ -203,9 +296,7 @@ canvas_region_class_init(CanvasRegionClass *klass)
     gtk_widget_class_bind_template_child(widget_class, CanvasRegion, gesture_drag);
     gtk_widget_class_bind_template_child(widget_class, CanvasRegion, gesture_click);
 
-    gtk_widget_class_bind_template_callback(widget_class, on_resize);
-
-    /* Gesture events */
+    /* Callbacks */
     gtk_widget_class_bind_template_callback(widget_class, on_mouse_press);
 
     gtk_widget_class_bind_template_callback(widget_class, on_gesture_drag_begin);

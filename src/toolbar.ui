@@ -9,6 +9,9 @@
 
                 <child>
                     <object class="GtkButton">
+                        <signal name="clicked" handler="on_open_button_click" object="Toolbar"
+                            swapped="no" />
+
                         <property name="child">
                             <object class="AdwButtonContent">
                                 <property name="icon-name">document-open-symbolic</property>
@@ -80,7 +83,7 @@
                             <object class="GtkAdjustment">
                                 <property name="lower">1</property>
                                 <property name="upper">120</property>
-                                <property name="value">6</property>
+                                <property name="value">2</property>
                                 <property name="page-increment">10</property>
                                 <property name="step-increment">1</property>
                             </object>
@@ -94,7 +97,6 @@
                     </object>
                 </child>
             </object>
-
         </child>
 
         <style>

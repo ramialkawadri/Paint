@@ -27,10 +27,37 @@ struct _Toolbar
     /* Widgets */
     GtkBox parent_type;
     GtkColorDialogButton *color_button;
-    GtkSpinButton *spin_button
+    GtkSpinButton *spin_button;
+
+    /* Callbacks */
+    GAsyncReadyCallback on_file_open_cb;
+    gpointer file_open_user_data;
 };
 
 G_DEFINE_FINAL_TYPE(Toolbar, toolbar, GTK_TYPE_BOX);
+
+static void
+on_open_button_click(GtkButton *button,
+                     gpointer user_data)
+{
+    Toolbar *self = user_data;
+
+    g_autoptr(GtkFileDialog) file_dialog = gtk_file_dialog_new();
+
+    GtkRoot *root = gtk_widget_get_root(GTK_WIDGET(self));
+
+    g_autoptr(GtkFileFilter) file_filter = gtk_file_filter_new();
+
+    gtk_file_filter_add_mime_type(file_filter, "image/*");
+
+    gtk_file_dialog_set_default_filter(file_dialog, file_filter);
+
+    gtk_file_dialog_open(file_dialog,
+                         GTK_WINDOW(root),
+                         NULL,
+                         self->on_file_open_cb,
+                         self->file_open_user_data);
+}
 
 const GdkRGBA *
 toolbar_get_current_color(Toolbar *self)
@@ -42,6 +69,16 @@ double
 toolbar_get_draw_size(Toolbar *self)
 {
     return gtk_spin_button_get_value(self->spin_button);
+}
+
+void toolbar_set_file_open_cb(Toolbar *self, GAsyncReadyCallback cb)
+{
+    self->on_file_open_cb = cb;
+}
+
+void toolbar_set_file_open_user_data(Toolbar *self, gpointer user_data)
+{
+    self->file_open_user_data = user_data;
 }
 
 static void
@@ -68,6 +105,8 @@ toolbar_class_init(ToolbarClass *klass)
 
     gtk_widget_class_bind_template_child(widget_class, Toolbar, color_button);
     gtk_widget_class_bind_template_child(widget_class, Toolbar, spin_button);
+
+    gtk_widget_class_bind_template_callback(widget_class, on_open_button_click);
 
     G_OBJECT_CLASS(klass)->dispose = toolbar_dispose;
 }

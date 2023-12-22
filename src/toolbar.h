@@ -34,4 +34,7 @@ toolbar_get_current_color(Toolbar *self);
 double
 toolbar_get_draw_size(Toolbar *self);
 
+void toolbar_set_file_open_cb(Toolbar *self, GAsyncReadyCallback cb);
+void toolbar_set_file_open_user_data(Toolbar *self, gpointer user_data);
+
 G_END_DECLS

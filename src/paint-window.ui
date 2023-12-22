@@ -31,7 +31,11 @@
                         </child>
 
                         <child>
-                            <object class="CanvasRegion" id="canvas_region" />
+                            <object class="GtkScrolledWindow">
+                                <property name="child">
+                                    <object class="CanvasRegion" id="canvas_region" />
+                                </property>
+                            </object>
                         </child>
 
                     </object>
