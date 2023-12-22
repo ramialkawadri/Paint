@@ -24,6 +24,8 @@
 
                 <child>
                     <object class="GtkButton">
+                        <signal name="clicked" handler="on_save_button_click" object="Toolbar"
+                            swapped="no" />
                         <property name="child">
                             <object class="AdwButtonContent">
                                 <property name="icon-name">text-editor-symbolic</property>

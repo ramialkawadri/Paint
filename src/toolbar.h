@@ -37,4 +37,7 @@ toolbar_get_draw_size(Toolbar *self);
 void toolbar_set_file_open_cb(Toolbar *self, GAsyncReadyCallback cb);
 void toolbar_set_file_open_user_data(Toolbar *self, gpointer user_data);
 
+void toolbar_set_file_save_cb(Toolbar *self, GAsyncReadyCallback cb);
+void toolbar_set_file_save_user_data(Toolbar *self, gpointer user_data);
+
 G_END_DECLS

@@ -33,6 +33,7 @@ G_DECLARE_FINAL_TYPE(CanvasRegion, canvas_region, PAINT, CANVAS_REGION, GtkBox)
 void canvas_region_set_toolbar(CanvasRegion *self, Toolbar *toolbar);
 
 GAsyncReadyCallback canvas_region_get_file_open_callback(CanvasRegion *self);
+GAsyncReadyCallback canvas_region_get_file_save_callback(CanvasRegion *self);
 
 G_END_DECLS
 

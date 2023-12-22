@@ -113,8 +113,9 @@ void on_file_open(GObject *source_object,
 
     int width = gdk_pixbuf_get_width(pixbuf);
     int height = gdk_pixbuf_get_height(pixbuf);
-    int stride = cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, width);
-    cairo_format_t format = gdk_pixbuf_get_has_alpha(pixbuf) ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24;
+
+    cairo_format_t format = gdk_pixbuf_get_has_alpha(pixbuf) ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB30;
+    int stride = cairo_format_stride_for_width(format, width);
 
     cairo_surface_destroy(self->cairo_surface);
 
@@ -124,17 +125,52 @@ void on_file_open(GObject *source_object,
     self->height = height;
     self->current_file_path = filename;
 
+    gtk_drawing_area_set_content_width(self->drawing_area, width);
+    gtk_drawing_area_set_content_height(self->drawing_area, height);
+
     self->cairo_surface = cairo_image_surface_create_for_data(pixels,
                                                               format,
                                                               width,
                                                               height,
                                                               stride);
 
-    gtk_drawing_area_set_content_width(self->drawing_area, width);
-    gtk_drawing_area_set_content_height(self->drawing_area, height);
+    gtk_widget_queue_draw(GTK_WIDGET(self->drawing_area));
+}
 
-    gtk_widget_queue_draw(GTK_WIDGET(self->drawing_area));
-    gtk_widget_queue_draw(GTK_WIDGET(self->drawing_area));
+void on_file_save(GObject *source_object,
+                  GAsyncResult *res,
+                  gpointer data)
+{
+    CanvasRegion *self = data;
+    g_autoptr(GError) error = NULL;
+    g_autoptr(GFile) file = gtk_file_dialog_save_finish(GTK_FILE_DIALOG(source_object),
+                                                        res,
+                                                        &error);
+
+    if (error)
+    {
+        g_message("Error saving file: %s", error->message);
+        return;
+    }
+
+    char *filename = g_file_get_path(file);
+
+    unsigned char *pixels = cairo_image_surface_get_data(self->cairo_surface);
+
+    int stride = cairo_image_surface_get_stride(self->cairo_surface);
+
+    GdkPixbuf *pixbuf = gdk_pixbuf_new_from_data(pixels,
+                                                 GDK_COLORSPACE_RGB,
+                                                 1,
+                                                 8,
+                                                 self->width,
+                                                 self->height,
+                                                 stride,
+                                                 NULL, NULL);
+
+    gboolean is_saved = gdk_pixbuf_save(pixbuf, filename, "png", NULL, NULL);
+
+    self->is_current_file_saved = is_saved;
 }
 
 static void
@@ -254,6 +290,12 @@ canvas_region_get_file_open_callback(CanvasRegion *self)
     return on_file_open;
 }
 
+GAsyncReadyCallback
+canvas_region_get_file_save_callback(CanvasRegion *self)
+{
+    return on_file_save;
+}
+
 static void
 canvas_region_init(CanvasRegion *self)
 {
@@ -265,10 +307,13 @@ canvas_region_init(CanvasRegion *self)
     self->cairo_surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24,
                                                      self->width,
                                                      self->height);
-    make_surface_white(self->cairo_surface);
+
+    self->is_current_file_saved = true;
 
     self->draw_start_click_cb = &on_brush_draw_start_click;
     self->draw_cb = &on_brush_draw;
+
+    make_surface_white(self->cairo_surface);
 
     gtk_drawing_area_set_draw_func(self->drawing_area, draw_function, self, NULL);
 }

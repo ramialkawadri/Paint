@@ -61,4 +61,8 @@ paint_window_init(PaintWindow *self)
     toolbar_set_file_open_cb(self->toolbar,
                              canvas_region_get_file_open_callback(self->canvas_region));
     toolbar_set_file_open_user_data(self->toolbar, self->canvas_region);
+
+    toolbar_set_file_save_cb(self->toolbar,
+                             canvas_region_get_file_save_callback(self->canvas_region));
+    toolbar_set_file_save_user_data(self->toolbar, self->canvas_region);
 }
