@@ -24,10 +24,25 @@
 
 struct _Toolbar
 {
+    /* Widgets */
     GtkBox parent_type;
+    GtkColorDialogButton *color_button;
+    GtkSpinButton *spin_button
 };
 
 G_DEFINE_FINAL_TYPE(Toolbar, toolbar, GTK_TYPE_BOX);
+
+const GdkRGBA *
+toolbar_get_current_color(Toolbar *self)
+{
+    return gtk_color_dialog_button_get_rgba(self->color_button);
+}
+
+double
+toolbar_get_draw_size(Toolbar *self)
+{
+    return gtk_spin_button_get_value(self->spin_button);
+}
 
 static void
 toolbar_init(Toolbar *self)
@@ -50,6 +65,9 @@ toolbar_class_init(ToolbarClass *klass)
 
     gtk_widget_class_set_template_from_resource(widget_class,
                                                 "/org/gnome/paint/toolbar.ui");
+
+    gtk_widget_class_bind_template_child(widget_class, Toolbar, color_button);
+    gtk_widget_class_bind_template_child(widget_class, Toolbar, spin_button);
 
     G_OBJECT_CLASS(klass)->dispose = toolbar_dispose;
 }

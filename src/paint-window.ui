@@ -31,7 +31,7 @@
                         </child>
 
                         <child>
-                            <object class="CanvasRegion" id="canvas-region" />
+                            <object class="CanvasRegion" id="canvas_region" />
                         </child>
 
                     </object>

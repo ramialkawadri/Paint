@@ -28,4 +28,10 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE(Toolbar, toolbar, PAINT, TOOLBAR, GtkBox)
 
+const GdkRGBA *
+toolbar_get_current_color(Toolbar *self);
+
+double
+toolbar_get_draw_size(Toolbar *self);
+
 G_END_DECLS

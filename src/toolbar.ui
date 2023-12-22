@@ -30,8 +30,71 @@
                         </property>
                     </object>
                 </child>
-
             </object>
+        </child>
+
+        <child>
+            <object class="GtkSeparator">
+                <style>
+                    <class name="vertical" />
+                </style>
+            </object>
+        </child>
+
+        <child>
+            <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">6</property>
+
+                <child>
+                    <object class="GtkColorDialogButton" id="color_button">
+                        <property name="width-request">48</property>
+                        <property name="rgba">black</property>
+                        <property name="dialog">
+                            <object class="GtkColorDialog" />
+                        </property>
+                    </object>
+                </child>
+
+                <child>
+                    <object class="GtkLabel">
+                        <property name="label">Color</property>
+                    </object>
+                </child>
+
+                <style>
+                    <class name="ColorButtonContainer" />
+                </style>
+            </object>
+        </child>
+
+        <child>
+            <object class="GtkBox">
+                <property name="orientation">vertical</property>
+                <property name="spacing">6</property>
+                <property name="hexpand">true</property>
+                <property name="halign">end</property>
+                <child>
+                    <object class="GtkSpinButton" id="spin_button">
+                        <property name="adjustment">
+                            <object class="GtkAdjustment">
+                                <property name="lower">1</property>
+                                <property name="upper">120</property>
+                                <property name="value">6</property>
+                                <property name="page-increment">10</property>
+                                <property name="step-increment">1</property>
+                            </object>
+                        </property>
+                    </object>
+                </child>
+
+                <child>
+                    <object class="GtkLabel">
+                        <property name="label">Size (px)</property>
+                    </object>
+                </child>
+            </object>
+
         </child>
 
         <style>

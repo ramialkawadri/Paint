@@ -23,18 +23,21 @@
 #include "canvas-region.h"
 #include "brush.h"
 
+#include "toolbar.h"
+
 struct _CanvasRegion
 {
     /* Widgets */
     GtkBox parent_type;
     GtkDrawingArea *drawing_area;
+    Toolbar *toolbar;
 
     /* Controllers */
     GtkGestureDrag *gesture_drag;
     GtkGestureClick *gesture_click;
 
     /* Draw */
-    DrawEvent drawEvent;
+    DrawEvent draw_event;
     cairo_surface_t *cairo_surface;
 
     /* Callbacks */
@@ -43,6 +46,11 @@ struct _CanvasRegion
 };
 
 G_DEFINE_FINAL_TYPE(CanvasRegion, canvas_region, GTK_TYPE_BOX);
+
+void update_draw_event_from_toolbar(CanvasRegion *self)
+{
+    self->draw_event.draw_size = toolbar_get_draw_size(self->toolbar);
+}
 
 static void
 draw_function(GtkDrawingArea *area,
@@ -78,21 +86,25 @@ on_mouse_press(GtkGestureClick *gesture,
                gpointer user_data)
 {
     CanvasRegion *self = user_data;
+    cairo_t *cr;
 
     if (self->draw_start_click_cb == NULL)
     {
         return;
     }
 
-    cairo_t *cr = cairo_create(self->cairo_surface);
+    cr = cairo_create(self->cairo_surface);
 
-    self->drawEvent.current_x = x;
-    self->drawEvent.current_y = y;
+    self->draw_event.current_x = x;
+    self->draw_event.current_y = y;
 
-    self->draw_start_click_cb(self, cr, &self->drawEvent);
+    gdk_cairo_set_source_rgba(cr, toolbar_get_current_color(self->toolbar));
+    update_draw_event_from_toolbar(self);
 
-    self->drawEvent.last_x = self->drawEvent.current_x;
-    self->drawEvent.last_y = self->drawEvent.current_y;
+    self->draw_start_click_cb(self, cr, &self->draw_event);
+
+    self->draw_event.last_x = self->draw_event.current_x;
+    self->draw_event.last_y = self->draw_event.current_y;
 
     cairo_destroy(cr);
 
@@ -107,11 +119,11 @@ on_gesture_drag_begin(GtkGestureDrag *gesture,
 {
     CanvasRegion *self = user_data;
 
-    self->drawEvent.start_x = start_x;
-    self->drawEvent.start_y = start_y;
+    self->draw_event.start_x = start_x;
+    self->draw_event.start_y = start_y;
 
-    self->drawEvent.last_x = -1;
-    self->drawEvent.last_y = -1;
+    self->draw_event.last_x = -1;
+    self->draw_event.last_y = -1;
 }
 
 static void
@@ -123,16 +135,19 @@ on_gesture_drag_update(GtkGestureDrag *gesture,
     CanvasRegion *self = user_data;
     cairo_t *cr = cairo_create(self->cairo_surface);
 
-    self->drawEvent.offset_x = offset_x;
-    self->drawEvent.offset_y = offset_y;
+    self->draw_event.offset_x = offset_x;
+    self->draw_event.offset_y = offset_y;
 
-    self->drawEvent.current_x = self->drawEvent.start_x + offset_x;
-    self->drawEvent.current_y = self->drawEvent.start_y + offset_y;
+    self->draw_event.current_x = self->draw_event.start_x + offset_x;
+    self->draw_event.current_y = self->draw_event.start_y + offset_y;
 
-    self->draw_cb(self, cr, &self->drawEvent);
+    gdk_cairo_set_source_rgba(cr, toolbar_get_current_color(self->toolbar));
+    update_draw_event_from_toolbar(self);
 
-    self->drawEvent.last_x = self->drawEvent.current_x;
-    self->drawEvent.last_y = self->drawEvent.current_y;
+    self->draw_cb(self, cr, &self->draw_event);
+
+    self->draw_event.last_x = self->draw_event.current_x;
+    self->draw_event.last_y = self->draw_event.current_y;
 
     cairo_destroy(cr);
 
@@ -147,10 +162,14 @@ on_gesture_drag_end(GtkGestureDrag *gesture,
 {
 }
 
+void canvas_region_set_toolbar(CanvasRegion *self, Toolbar *toolbar)
+{
+    self->toolbar = toolbar;
+}
+
 static void
 canvas_region_init(CanvasRegion *self)
 {
-    // TODO: refactor all initializations
     gtk_widget_init_template(GTK_WIDGET(self));
 
     self->cairo_surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, 800, 400);

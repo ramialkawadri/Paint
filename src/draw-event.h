@@ -33,6 +33,8 @@ struct DrawEvent
 
     gdouble current_x;
     gdouble current_y;
+
+    gdouble draw_size;
 };
 
 typedef struct DrawEvent DrawEvent;
