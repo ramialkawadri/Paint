@@ -26,18 +26,21 @@
 
 G_BEGIN_DECLS
 
-#define PAINT_TYPE_CANVAS_REGION (canvas_region_get_type())
+#define PAINT_TYPE_CANVAS_REGION (canvas_region_get_type ())
 
-G_DECLARE_FINAL_TYPE(CanvasRegion, canvas_region, PAINT, CANVAS_REGION, GtkBox)
+G_DECLARE_FINAL_TYPE (CanvasRegion, canvas_region, PAINT, CANVAS_REGION, GtkBox)
 
-void canvas_region_set_toolbar(CanvasRegion *self, Toolbar *toolbar);
+typedef void (*on_draw_start_click) (CanvasRegion *self,
+                                     cairo_t *cr,
+                                     DrawEvent *draw_event);
+typedef void (*on_draw)             (CanvasRegion *self,
+                                     cairo_t *cr,
+                                     DrawEvent *draw_event);
 
-GAsyncReadyCallback canvas_region_get_file_open_callback(CanvasRegion *self);
-GAsyncReadyCallback canvas_region_get_file_save_callback(CanvasRegion *self);
+void                canvas_region_set_toolbar            (CanvasRegion *self,
+                                                          Toolbar *toolbar);
+
+GAsyncReadyCallback canvas_region_get_file_open_callback (CanvasRegion *self);
+GAsyncReadyCallback canvas_region_get_file_save_callback (CanvasRegion *self);
 
 G_END_DECLS
-
-// Functions
-#define DRAW_FUNCTIONS_PARAMETERS (CanvasRegion * self, cairo_t * cr, DrawEvent * draw_event)
-typedef void(*on_draw_start_click) DRAW_FUNCTIONS_PARAMETERS;
-typedef void(*on_draw) DRAW_FUNCTIONS_PARAMETERS;

@@ -22,19 +22,19 @@
 
 struct DrawEvent
 {
-    gdouble start_x;
-    gdouble start_y;
+  gdouble start_x;
+  gdouble start_y;
 
-    gdouble offset_x;
-    gdouble offset_y;
+  gdouble offset_x;
+  gdouble offset_y;
 
-    gdouble last_x;
-    gdouble last_y;
+  gdouble last_x;
+  gdouble last_y;
 
-    gdouble current_x;
-    gdouble current_y;
+  gdouble current_x;
+  gdouble current_y;
 
-    gdouble draw_size;
+  gdouble draw_size;
 };
 
 typedef struct DrawEvent DrawEvent;

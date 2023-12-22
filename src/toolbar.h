@@ -24,20 +24,22 @@
 
 G_BEGIN_DECLS
 
-#define PAINT_TYPE_TOOLBAR (toolbar_get_type())
+#define PAINT_TYPE_TOOLBAR (toolbar_get_type ())
 
-G_DECLARE_FINAL_TYPE(Toolbar, toolbar, PAINT, TOOLBAR, GtkBox)
+G_DECLARE_FINAL_TYPE (Toolbar, toolbar, PAINT, TOOLBAR, GtkBox)
 
-const GdkRGBA *
-toolbar_get_current_color(Toolbar *self);
+const GdkRGBA *toolbar_get_current_color       (Toolbar *self);
 
-double
-toolbar_get_draw_size(Toolbar *self);
+double         toolbar_get_draw_size           (Toolbar *self);
 
-void toolbar_set_file_open_cb(Toolbar *self, GAsyncReadyCallback cb);
-void toolbar_set_file_open_user_data(Toolbar *self, gpointer user_data);
+void           toolbar_set_file_open_cb        (Toolbar *self,
+                                                GAsyncReadyCallback cb);
+void           toolbar_set_file_open_user_data (Toolbar *self,
+                                                gpointer user_data);
 
-void toolbar_set_file_save_cb(Toolbar *self, GAsyncReadyCallback cb);
-void toolbar_set_file_save_user_data(Toolbar *self, gpointer user_data);
+void           toolbar_set_file_save_cb        (Toolbar *self,
+                                                GAsyncReadyCallback cb);
+void           toolbar_set_file_save_user_data (Toolbar *self,
+                                                gpointer user_data);
 
 G_END_DECLS
