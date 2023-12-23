@@ -1,4 +1,4 @@
-/* brush.h
+/* circle.c
  *
  * Copyright 2023 Ramikw
  *
@@ -18,15 +18,42 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#pragma once
-
 #include "canvas-region.h"
 #include "draw-event.h"
+#include "circle.h"
 
-void on_brush_draw_start_click (CanvasRegion *self,
+void on_circle_draw_start_click (CanvasRegion *self,
                                 cairo_t *cr,
-                                DrawEvent *draw_event);
+                                DrawEvent *draw_event)
+{
+}
 
-void on_brush_draw             (CanvasRegion *self,
-                                cairo_t *cr,
-                                DrawEvent *draw_event);
+void on_circle_draw (CanvasRegion *self,
+                     cairo_t *cr,
+                     DrawEvent *draw_event)
+{
+  gdouble x;
+  gdouble y;
+  gdouble width;
+  gdouble height;
+
+  width = ABS(draw_event->current_x - draw_event->start_x);
+  height = ABS(draw_event->current_y - draw_event->start_y);
+
+  x = (draw_event->start_x + draw_event->current_x) / 2;
+  y = (draw_event->start_y + draw_event->current_y) / 2;
+
+  cairo_save (cr);
+
+  cairo_translate (cr, x, y);
+  cairo_scale (cr, width / 2, height / 2);
+  cairo_arc (cr, 0, 0, 1, 0, 2 * G_PI);
+
+  cairo_restore (cr);
+
+  cairo_set_line_width(cr, draw_event->draw_size);
+  cairo_stroke(cr);
+}
+
+
+

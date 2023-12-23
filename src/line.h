@@ -1,4 +1,4 @@
-/* brush.h
+/* line.h
  *
  * Copyright 2023 Ramikw
  *
@@ -23,10 +23,10 @@
 #include "canvas-region.h"
 #include "draw-event.h"
 
-void on_brush_draw_start_click (CanvasRegion *self,
-                                cairo_t *cr,
-                                DrawEvent *draw_event);
+void on_line_draw_start_click (CanvasRegion *self,
+                               cairo_t *cr,
+                               DrawEvent *draw_event);
 
-void on_brush_draw             (CanvasRegion *self,
-                                cairo_t *cr,
-                                DrawEvent *draw_event);
+void on_line_draw             (CanvasRegion *self,
+                               cairo_t *cr,
+                               DrawEvent *draw_event);

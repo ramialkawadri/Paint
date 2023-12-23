@@ -115,6 +115,8 @@ get_window_title (gboolean is_file_saved,
   g_autoptr (GFile) file;
   char *file_name_to_show;
 
+  file = NULL;
+
   if (file_name == NULL)
     return "*Paint - Untitled";
     

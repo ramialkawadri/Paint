@@ -24,5 +24,7 @@ typedef enum _DRAWING_TOOL {
   BRUSH,
   ERASER,
   RECTANGLE,
-  CIRCLE
+  CIRCLE,
+  LINE,
+  TEXT,
 } DRAWING_TOOL;

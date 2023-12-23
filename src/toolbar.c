@@ -37,6 +37,8 @@ struct _Toolbar
   GtkButton            *eraser_button;
   GtkButton            *rectangle_button;
   GtkButton            *circle_button;
+  GtkButton            *line_button;
+  GtkButton            *text_button;
 };
 
 enum {
@@ -119,6 +121,26 @@ on_circle_button_click (GtkButton *button,
   g_signal_emit (self, toolbar_signals[TOOL_CHANGE], 0, CIRCLE);
 }
 
+static void
+on_line_button_click (GtkButton *button,
+                      gpointer   user_data)
+{
+  Toolbar *self = user_data;
+
+  update_current_selected_tool (self, self->line_button);
+  g_signal_emit (self, toolbar_signals[TOOL_CHANGE], 0, LINE);
+}
+
+static void
+on_text_button_click (GtkButton *button,
+                      gpointer   user_data)
+{
+  Toolbar *self = user_data;
+
+  update_current_selected_tool (self, self->text_button);
+  g_signal_emit (self, toolbar_signals[TOOL_CHANGE], 0, TEXT);
+}
+
 const GdkRGBA *
 toolbar_get_current_color (Toolbar *self)
 {
@@ -161,6 +183,8 @@ toolbar_class_init (ToolbarClass *klass)
   gtk_widget_class_bind_template_child (widget_class, Toolbar, eraser_button);
   gtk_widget_class_bind_template_child (widget_class, Toolbar, rectangle_button);
   gtk_widget_class_bind_template_child (widget_class, Toolbar, circle_button);
+  gtk_widget_class_bind_template_child (widget_class, Toolbar, line_button);
+  gtk_widget_class_bind_template_child (widget_class, Toolbar, text_button);
 
   gtk_widget_class_bind_template_callback (widget_class, on_open_button_click);
   gtk_widget_class_bind_template_callback (widget_class, on_save_button_click);
@@ -168,6 +192,8 @@ toolbar_class_init (ToolbarClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_eraser_button_click);
   gtk_widget_class_bind_template_callback (widget_class, on_rectangle_button_click);
   gtk_widget_class_bind_template_callback (widget_class, on_circle_button_click);
+  gtk_widget_class_bind_template_callback (widget_class, on_line_button_click);
+  gtk_widget_class_bind_template_callback (widget_class, on_text_button_click);
 
   G_OBJECT_CLASS (klass)->dispose = toolbar_dispose;
 

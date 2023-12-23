@@ -1,4 +1,4 @@
-/* brush.h
+/* line.c
  *
  * Copyright 2023 Ramikw
  *
@@ -18,15 +18,24 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#pragma once
-
 #include "canvas-region.h"
 #include "draw-event.h"
+#include "line.h"
 
-void on_brush_draw_start_click (CanvasRegion *self,
-                                cairo_t *cr,
-                                DrawEvent *draw_event);
+void on_line_draw_start_click (CanvasRegion *self,
+                               cairo_t *cr,
+                               DrawEvent *draw_event)
+{
+}
 
-void on_brush_draw             (CanvasRegion *self,
-                                cairo_t *cr,
-                                DrawEvent *draw_event);
+void on_line_draw (CanvasRegion *self,
+                   cairo_t *cr,
+                   DrawEvent *draw_event)
+{
+  cairo_move_to (cr, draw_event->start_x, draw_event->start_y);
+  cairo_line_to (cr, draw_event->current_x, draw_event->current_y);
+
+  cairo_set_line_width(cr, draw_event->draw_size);
+  cairo_stroke (cr);
+}
+

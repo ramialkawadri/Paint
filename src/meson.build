@@ -1,10 +1,13 @@
 paint_sources = [
     'brush.c',
     'canvas-region.c',
+    'circle.c',
+    'line.c',
     'main.c',
     'paint-application.c',
     'paint-window.c',
-    'toolbar.c'
+    'rectangle.c',
+    'toolbar.c',
 ]
 
 paint_deps = [

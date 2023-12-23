@@ -88,6 +88,9 @@
           <object class="GtkButton" id="brush_button">
             <signal name="clicked" handler="on_brush_button_click" object="Toolbar"
               swapped="no" />
+
+            <property name="tooltip-text">Brush</property>
+
             <property name="child">
               <object class="AdwButtonContent">
                 <property name="icon-name">paintbrush-symbolic</property>
@@ -111,6 +114,9 @@
           <object class="GtkButton" id="eraser_button">
             <signal name="clicked" handler="on_eraser_button_click" object="Toolbar"
               swapped="no" />
+
+            <property name="tooltip-text">Eraser</property>
+
             <property name="child">
               <object class="AdwButtonContent">
                 <property name="icon-name">eraser5-symbolic</property>
@@ -131,6 +137,9 @@
           <object class="GtkButton" id="rectangle_button">
             <signal name="clicked" handler="on_rectangle_button_click" object="Toolbar"
               swapped="no" />
+
+            <property name="tooltip-text">Rectangle</property>
+
             <property name="child">
               <object class="AdwButtonContent">
                 <property name="icon-name">square-outline-thick-symbolic</property>
@@ -150,6 +159,9 @@
           <object class="GtkButton" id="circle_button">
             <signal name="clicked" handler="on_circle_button_click" object="Toolbar"
               swapped="no" />
+
+            <property name="tooltip-text">Circle</property>
+
             <property name="child">
               <object class="AdwButtonContent">
                 <property name="icon-name">circle-outline-thick-symbolic</property>
@@ -159,6 +171,50 @@
 
             <layout>
               <property name="column">1</property>
+              <property name="row">1</property>
+            </layout>
+          </object>
+        </child>
+
+        <!--Line-->
+        <child>
+          <object class="GtkButton" id="line_button">
+            <signal name="clicked" handler="on_line_button_click" object="Toolbar"
+              swapped="no" />
+
+            <property name="tooltip-text">Line</property>
+
+            <property name="child">
+              <object class="AdwButtonContent">
+                <property name="icon-name">function-linear-symbolic</property>
+                <property name="use-underline">True</property>
+              </object>
+            </property>
+
+            <layout>
+              <property name="column">2</property>
+              <property name="row">0</property>
+            </layout>
+          </object>
+        </child>
+
+        <!--Text-->
+        <child>
+          <object class="GtkButton" id="text_button">
+            <signal name="clicked" handler="on_text_button_click" object="Toolbar"
+              swapped="no" />
+
+            <property name="tooltip-text">Text</property>
+
+            <property name="child">
+              <object class="AdwButtonContent">
+                <property name="icon-name">text2-symbolic</property>
+                <property name="use-underline">True</property>
+              </object>
+            </property>
+
+            <layout>
+              <property name="column">2</property>
               <property name="row">1</property>
             </layout>
           </object>
