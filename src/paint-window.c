@@ -37,6 +37,22 @@ struct _PaintWindow
 G_DEFINE_FINAL_TYPE (PaintWindow, paint_window, ADW_TYPE_APPLICATION_WINDOW)
 
 static void
+on_toolbar_file_open (Toolbar *toolbar,
+                      gpointer user_data)
+{
+  PaintWindow *self = user_data;
+  canvas_region_open_new_file (self->canvas_region);
+}
+
+static void
+on_toolbar_file_save (Toolbar *toolbar,
+                      gpointer user_data)
+{
+  PaintWindow *self = user_data;
+  canvas_region_save_new_file (self->canvas_region);
+}
+
+static void
 paint_window_class_init (PaintWindowClass *klass)
 {
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
@@ -48,6 +64,9 @@ paint_window_class_init (PaintWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, PaintWindow, toolbar);
   gtk_widget_class_bind_template_child (widget_class, PaintWindow, canvas_region);
 
+  gtk_widget_class_bind_template_callback (widget_class, on_toolbar_file_open);
+  gtk_widget_class_bind_template_callback (widget_class, on_toolbar_file_save);
+
   g_type_ensure (PAINT_TYPE_CANVAS_REGION);
   g_type_ensure (PAINT_TYPE_TOOLBAR);
 }
@@ -58,12 +77,4 @@ paint_window_init (PaintWindow *self)
   gtk_widget_init_template (GTK_WIDGET(self));
 
   canvas_region_set_toolbar (self->canvas_region, self->toolbar);
-
-  toolbar_set_file_open_cb (self->toolbar,
-                            canvas_region_get_file_open_callback (self->canvas_region));
-  toolbar_set_file_open_user_data (self->toolbar, self->canvas_region);
-
-  toolbar_set_file_save_cb (self->toolbar,
-                            canvas_region_get_file_save_callback (self->canvas_region));
-  toolbar_set_file_save_user_data (self->toolbar, self->canvas_region);
 }

@@ -67,71 +67,27 @@ update_draw_event_from_toolbar (CanvasRegion *self)
 static void
 save_canvas (CanvasRegion *self)
 {
-  unsigned char *pixels;
-  GdkPixbuf *pixbuf;
-  gboolean is_saved;
-  int stride;
+  if (self->is_current_file_saved)
+    return;
 
-  // TODO: saving doesn't save colors correctly
-  pixels = cairo_image_surface_get_data (self->cairo_surface);
-
-  stride = cairo_image_surface_get_stride (self->cairo_surface);
-
-  pixbuf = gdk_pixbuf_new_from_data (pixels,
-                                     GDK_COLORSPACE_RGB,
-                                     0, 8,
-                                     self->width,
-                                     self->height,
-                                     stride,
-                                     NULL, NULL);
-
-  is_saved = gdk_pixbuf_save (pixbuf, self->current_filename, "png", NULL, NULL);
-
-  self->is_current_file_saved = is_saved;
+  cairo_surface_write_to_png (self->cairo_surface, self->current_filename);
+  self->is_current_file_saved = true;
 }
 
 static void
 load_file (CanvasRegion *self,
            char         *filename)
 {
-  g_autoptr (GError) error;
-  int width;
-  int height;
-  int stride;
-  cairo_format_t format;
-  GdkPixbuf *pixbuf;
-  guchar *pixels;
-
-  // TODO: opening doesn't load colors correctly
-  error = NULL;
-
-  self->current_filename = filename;
-
-  pixbuf = gdk_pixbuf_new_from_file (filename, &error);
-
-  width = gdk_pixbuf_get_width (pixbuf);
-  height = gdk_pixbuf_get_height (pixbuf);
-
-  format = gdk_pixbuf_get_has_alpha (pixbuf) ? CAIRO_FORMAT_ARGB32 : CAIRO_FORMAT_RGB24;
-
-  stride = cairo_format_stride_for_width (format, width);
-
   cairo_surface_destroy (self->cairo_surface);
+  self->cairo_surface = cairo_image_surface_create_from_png (filename);
 
-  pixels = gdk_pixbuf_get_pixels (pixbuf);
-
-  self->width = width;
-  self->height = height;
+  self->width = cairo_image_surface_get_width (self->cairo_surface);
+  self->height = cairo_image_surface_get_height (self->cairo_surface);
   self->current_filename = filename;
+  self->is_current_file_saved = true;
 
-  gtk_drawing_area_set_content_width (self->drawing_area, width);
-  gtk_drawing_area_set_content_height (self->drawing_area, height);
-
-  self->cairo_surface = cairo_image_surface_create_for_data (pixels,
-                                                             format,
-                                                             width,
-                                                             height,
-                                                             stride);
+  gtk_drawing_area_set_content_width (self->drawing_area, self->width);
+  gtk_drawing_area_set_content_height (self->drawing_area, self->height);
 
   gtk_widget_queue_draw (GTK_WIDGET(self->drawing_area));
 }
@@ -186,15 +142,14 @@ on_prompt_to_save_response_file_open (AdwMessageDialog *dialog,
       save_canvas (cb_data->self);
     }
 
-  cb_data->self->is_current_file_saved = true;
   load_file (cb_data->self, cb_data->user_data);
   g_free (cb_data);
 }
 
 static void
-on_file_open (GObject      *source_object,
-              GAsyncResult *res,
-              gpointer      data)
+on_file_dialog_open_finish (GObject      *source_object,
+                            GAsyncResult *res,
+                            gpointer      data)
 {
   CanvasRegion *self;
   CanvasRegionUserData *cb_data;
@@ -229,9 +184,9 @@ on_file_open (GObject      *source_object,
 }
 
 static void
-on_file_save (GObject      *source_object,
-              GAsyncResult *res,
-              gpointer      data)
+on_file_dialog_save_finish (GObject      *source_object,
+                            GAsyncResult *res,
+                            gpointer      data)
 {
   CanvasRegion *self;
   g_autoptr (GError) error;
@@ -375,16 +330,60 @@ canvas_region_set_toolbar (CanvasRegion *self,
   self->toolbar = toolbar;
 }
 
-GAsyncReadyCallback
-canvas_region_get_file_open_callback (CanvasRegion *self)
+void
+canvas_region_open_new_file (CanvasRegion *self)
 {
-  return on_file_open;
+  GtkRoot *root;
+
+  g_autoptr (GtkFileDialog) file_dialog;
+  g_autoptr (GtkFileFilter) file_filter;
+
+  root = gtk_widget_get_root (GTK_WIDGET (self));
+
+  file_dialog = gtk_file_dialog_new ();
+  file_filter = gtk_file_filter_new ();
+
+  gtk_file_filter_add_suffix (file_filter, "png");
+  gtk_file_dialog_set_default_filter (file_dialog, file_filter);
+
+  gtk_file_dialog_open (file_dialog,
+                        GTK_WINDOW (root),
+                        NULL,
+                        on_file_dialog_open_finish,
+                        self);
 }
 
-GAsyncReadyCallback
-canvas_region_get_file_save_callback (CanvasRegion *self)
+static void
+show_save_file_dialog (CanvasRegion *self)
 {
-  return on_file_save;
+  GtkRoot *root;
+
+  g_autoptr (GtkFileDialog) file_dialog;
+  g_autoptr (GtkFileFilter) file_filter;
+
+  root = gtk_widget_get_root (GTK_WIDGET(self));
+
+  file_dialog = gtk_file_dialog_new ();
+  file_filter = gtk_file_filter_new ();
+
+  gtk_file_filter_add_suffix (file_filter, "png");
+  gtk_file_dialog_set_default_filter (file_dialog, file_filter);
+  gtk_file_dialog_set_initial_name (file_dialog, "untitled.png");
+
+  gtk_file_dialog_save (file_dialog,
+                        GTK_WINDOW (root),
+                        NULL,
+                        on_file_dialog_save_finish,
+                        self);
+}
+
+void
+canvas_region_save_new_file (CanvasRegion *self)
+{
+  if (self->current_filename != NULL)
+    save_canvas (self);
+  else
+    show_save_file_dialog (self);
 }
 
 static void

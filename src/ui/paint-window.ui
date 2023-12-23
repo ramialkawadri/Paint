@@ -6,6 +6,7 @@
     <template class="PaintWindow" parent="AdwApplicationWindow">
         <property name="default-width">1000</property>
         <property name="default-height">700</property>
+        <property name="title">Paint</property>
 
         <property name="content">
             <object class="AdwToolbarView">
@@ -27,7 +28,12 @@
                         <property name="orientation">vertical</property>
 
                         <child>
-                            <object class="Toolbar" id="toolbar" />
+                            <object class="Toolbar" id="toolbar">
+                                <signal name="open-file" handler="on_toolbar_file_open"
+                                    object="PaintWindow" swapped="no" />
+                                <signal name="save-file" handler="on_toolbar_file_save"
+                                    object="PaintWindow" swapped="no" />
+                            </object>
                         </child>
                         
                         <child>

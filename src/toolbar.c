@@ -28,70 +28,33 @@ struct _Toolbar
   GtkBox                parent_type;
   GtkColorDialogButton *color_button;
   GtkSpinButton        *spin_button;
-
-  /* Callbacks */
-  GAsyncReadyCallback   on_file_open_cb;
-  gpointer              file_open_user_data;
-  GAsyncReadyCallback   on_file_save_cb;
-  gpointer              file_save_user_data;
 };
 
+enum {
+  OPEN_FILE,
+  SAVE_FILE,
+  NUMBER_OF_SIGNALS
+};
+
+static guint toolbar_signals[NUMBER_OF_SIGNALS];
+
 G_DEFINE_FINAL_TYPE (Toolbar, toolbar, GTK_TYPE_BOX);
+
 
 static void
 on_open_button_click (GtkButton *button,
                       gpointer   user_data)
 {
-  Toolbar *self;
-  GtkRoot *root;
-
-  g_autoptr (GtkFileDialog) file_dialog;
-  g_autoptr (GtkFileFilter) file_filter;
-
-  self = (Toolbar *) user_data;
-  root = gtk_widget_get_root (GTK_WIDGET(self));
-
-  file_dialog = gtk_file_dialog_new ();
-  file_filter = gtk_file_filter_new ();
-
-  gtk_file_filter_add_mime_type (file_filter, "image/*");
-
-  gtk_file_dialog_set_default_filter (file_dialog, file_filter);
-
-  gtk_file_dialog_open (file_dialog,
-                        GTK_WINDOW (root),
-                        NULL,
-                        self->on_file_open_cb,
-                        self->file_open_user_data);
+  Toolbar *self = user_data;
+  g_signal_emit (self, toolbar_signals[OPEN_FILE], 0);
 }
 
 static void
 on_save_button_click (GtkButton *button,
                       gpointer   user_data)
 {
-  // TODO: move to canvas-region
-  Toolbar *self;
-  GtkRoot *root;
-
-  g_autoptr (GtkFileDialog) file_dialog;
-  g_autoptr (GtkFileFilter) file_filter;
-
-  self = user_data;
-  root = gtk_widget_get_root (GTK_WIDGET(self));
-
-  file_dialog = gtk_file_dialog_new ();
-  file_filter = gtk_file_filter_new ();
-
-  gtk_file_filter_add_mime_type (file_filter, "image/*");
-
-  gtk_file_dialog_set_default_filter (file_dialog, file_filter);
-  gtk_file_dialog_set_initial_name (file_dialog, "untitled.png");
-
-  gtk_file_dialog_save (file_dialog,
-                        GTK_WINDOW (root),
-                        NULL,
-                        self->on_file_save_cb,
-                        self->file_save_user_data);
+  Toolbar *self = user_data;
+  g_signal_emit (self, toolbar_signals[SAVE_FILE], 0);
 }
 
 const GdkRGBA *
@@ -104,34 +67,6 @@ double
 toolbar_get_draw_size (Toolbar *self)
 {
   return gtk_spin_button_get_value (self->spin_button);
-}
-
-void
-toolbar_set_file_open_cb (Toolbar *self,
-                          GAsyncReadyCallback cb)
-{
-  self->on_file_open_cb = cb;
-}
-
-void
-toolbar_set_file_open_user_data (Toolbar *self,
-                                 gpointer user_data)
-{
-  self->file_open_user_data = user_data;
-}
-
-void
-toolbar_set_file_save_cb (Toolbar *self,
-                          GAsyncReadyCallback cb)
-{
-  self->on_file_save_cb = cb;
-}
-
-void
-toolbar_set_file_save_user_data (Toolbar *self,
-                                 gpointer user_data)
-{
-  self->file_save_user_data = user_data;
 }
 
 static void
@@ -159,8 +94,28 @@ toolbar_class_init (ToolbarClass *klass)
   gtk_widget_class_bind_template_child (widget_class, Toolbar, color_button);
   gtk_widget_class_bind_template_child (widget_class, Toolbar, spin_button);
 
-  gtk_widget_class_bind_template_callback (widget_class, on_save_button_click);
   gtk_widget_class_bind_template_callback (widget_class, on_open_button_click);
+  gtk_widget_class_bind_template_callback (widget_class, on_save_button_click);
 
   G_OBJECT_CLASS (klass)->dispose = toolbar_dispose;
+
+  toolbar_signals[OPEN_FILE] = g_signal_new ("open-file",
+                                             G_TYPE_FROM_CLASS (klass),
+                                             G_SIGNAL_RUN_LAST,
+                                             0,
+                                             NULL,
+                                             NULL,
+                                             NULL,
+                                             G_TYPE_NONE,
+                                             0);
+
+  toolbar_signals[SAVE_FILE] = g_signal_new ("save-file",
+                                             G_TYPE_FROM_CLASS (klass),
+                                             G_SIGNAL_RUN_LAST,
+                                             0,
+                                             NULL,
+                                             NULL,
+                                             NULL,
+                                             G_TYPE_NONE,
+                                             0);
 }
