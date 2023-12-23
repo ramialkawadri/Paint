@@ -43,4 +43,6 @@ void                canvas_region_set_toolbar            (CanvasRegion *self,
 void                canvas_region_open_new_file          (CanvasRegion *self);
 void                canvas_region_save_new_file          (CanvasRegion *self);
 
+char               *canvas_region_get_current_file_name  (CanvasRegion *self);
+
 G_END_DECLS

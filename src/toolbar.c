@@ -99,6 +99,8 @@ toolbar_class_init (ToolbarClass *klass)
 
   G_OBJECT_CLASS (klass)->dispose = toolbar_dispose;
 
+  /* Signals */
+
   toolbar_signals[OPEN_FILE] = g_signal_new ("open-file",
                                              G_TYPE_FROM_CLASS (klass),
                                              G_SIGNAL_RUN_LAST,

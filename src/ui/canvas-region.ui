@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-    <template class="CanvasRegion" parent="GtkBox">
-        <property name="orientation">horizontal</property>
-        <property name="vexpand">true</property>
-        <property name="hexpand">true</property>
+  <template class="CanvasRegion" parent="GtkBox">
+    <property name="orientation">horizontal</property>
+    <property name="vexpand">true</property>
+    <property name="hexpand">true</property>
+
+    <child>
+      <object class="GtkDrawingArea" id="drawing_area">
+        <property name="content-width">800</property>
+        <property name="content-height">400</property>
+        <property name="valign">start</property>
 
         <child>
-            <object class="GtkDrawingArea" id="drawing_area">
-                <property name="content-width">800</property>
-                <property name="content-height">400</property>
-                <property name="valign">start</property>
+          <object class="GtkGestureClick" id="gesture_click">
+            <signal name="pressed" handler="on_mouse_press" object="CanvasRegion"
+              swapped="no" />
+          </object>
+        </child>
 
-                <child>
-                    <object class="GtkGestureClick" id="gesture_click">
-                        <signal name="pressed" handler="on_mouse_press" object="CanvasRegion"
-                            swapped="no" />
-                    </object>
-                </child>
-
-                <child>
-                    <object class="GtkGestureDrag" id="gesture_drag">
-                        <signal name="drag-begin" handler="on_gesture_drag_begin"
-                            object="CanvasRegion" swapped="no" />
-                        <signal name="drag-update" handler="on_gesture_drag_update"
-                            object="CanvasRegion" swapped="no" />
-                        <signal name="drag-end" handler="on_gesture_drag_end" object="CanvasRegion"
-                            swapped="no" />
-                    </object>
-                </child>
-
-                <style>
-                    <class name="drawing-area" />
-                </style>
-            </object>
+        <child>
+          <object class="GtkGestureDrag" id="gesture_drag">
+            <signal name="drag-begin" handler="on_gesture_drag_begin"
+              object="CanvasRegion" swapped="no" />
+            <signal name="drag-update" handler="on_gesture_drag_update"
+              object="CanvasRegion" swapped="no" />
+            <signal name="drag-end" handler="on_gesture_drag_end" object="CanvasRegion"
+              swapped="no" />
+          </object>
         </child>
 
         <style>
-            <class name="canvas-region" />
+          <class name="drawing-area" />
         </style>
-    </template>
+      </object>
+    </child>
+
+    <style>
+      <class name="canvas-region" />
+    </style>
+  </template>
 </interface>

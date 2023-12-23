@@ -1,109 +1,109 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-    <template class="Toolbar" parent="GtkBox">
-        <property name="orientation">horizontal</property>
+  <template class="Toolbar" parent="GtkBox">
+    <property name="orientation">horizontal</property>
+
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
 
         <child>
-            <object class="GtkBox">
-                <property name="orientation">vertical</property>
+          <object class="GtkButton">
+            <signal name="clicked" handler="on_open_button_click" object="Toolbar"
+              swapped="no" />
 
-                <child>
-                    <object class="GtkButton">
-                        <signal name="clicked" handler="on_open_button_click" object="Toolbar"
-                            swapped="no" />
-
-                        <property name="child">
-                            <object class="AdwButtonContent">
-                                <property name="icon-name">document-open-symbolic</property>
-                                <property name="label" translatable="yes">_Open</property>
-                                <property name="use-underline">True</property>
-                            </object>
-                        </property>
-                    </object>
-                </child>
-
-                <child>
-                    <object class="GtkButton">
-                        <signal name="clicked" handler="on_save_button_click" object="Toolbar"
-                            swapped="no" />
-                        <property name="child">
-                            <object class="AdwButtonContent">
-                                <property name="icon-name">text-editor-symbolic</property>
-                                <property name="label" translatable="yes">_Save</property>
-                                <property name="use-underline">True</property>
-                            </object>
-                        </property>
-                    </object>
-                </child>
-            </object>
+            <property name="child">
+              <object class="AdwButtonContent">
+                <property name="icon-name">document-open-symbolic</property>
+                <property name="label" translatable="yes">_Open</property>
+                <property name="use-underline">True</property>
+              </object>
+            </property>
+          </object>
         </child>
 
         <child>
-            <object class="GtkSeparator">
-                <style>
-                    <class name="vertical" />
-                </style>
-            </object>
+          <object class="GtkButton">
+            <signal name="clicked" handler="on_save_button_click" object="Toolbar"
+              swapped="no" />
+            <property name="child">
+              <object class="AdwButtonContent">
+                <property name="icon-name">text-editor-symbolic</property>
+                <property name="label" translatable="yes">_Save</property>
+                <property name="use-underline">True</property>
+              </object>
+            </property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <child>
+      <object class="GtkSeparator">
+        <style>
+          <class name="vertical" />
+        </style>
+      </object>
+    </child>
+
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">6</property>
+
+        <child>
+          <object class="GtkColorDialogButton" id="color_button">
+            <property name="width-request">48</property>
+            <property name="rgba">black</property>
+            <property name="dialog">
+              <object class="GtkColorDialog" />
+            </property>
+          </object>
         </child>
 
         <child>
-            <object class="GtkBox">
-                <property name="orientation">vertical</property>
-                <property name="spacing">6</property>
-
-                <child>
-                    <object class="GtkColorDialogButton" id="color_button">
-                        <property name="width-request">48</property>
-                        <property name="rgba">black</property>
-                        <property name="dialog">
-                            <object class="GtkColorDialog" />
-                        </property>
-                    </object>
-                </child>
-
-                <child>
-                    <object class="GtkLabel">
-                        <property name="label">Color</property>
-                    </object>
-                </child>
-
-                <style>
-                    <class name="ColorButtonContainer" />
-                </style>
-            </object>
-        </child>
-
-        <child>
-            <object class="GtkBox">
-                <property name="orientation">vertical</property>
-                <property name="spacing">6</property>
-                <property name="hexpand">true</property>
-                <property name="halign">end</property>
-                <child>
-                    <object class="GtkSpinButton" id="spin_button">
-                        <property name="adjustment">
-                            <object class="GtkAdjustment">
-                                <property name="lower">1</property>
-                                <property name="upper">120</property>
-                                <property name="value">2</property>
-                                <property name="page-increment">10</property>
-                                <property name="step-increment">1</property>
-                            </object>
-                        </property>
-                    </object>
-                </child>
-
-                <child>
-                    <object class="GtkLabel">
-                        <property name="label">Size (px)</property>
-                    </object>
-                </child>
-            </object>
+          <object class="GtkLabel">
+            <property name="label">Color</property>
+          </object>
         </child>
 
         <style>
-            <class name="toolbar" />
-            <class name="frame" />
+          <class name="ColorButtonContainer" />
         </style>
-    </template>
+      </object>
+    </child>
+
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="spacing">6</property>
+        <property name="hexpand">true</property>
+        <property name="halign">end</property>
+        <child>
+          <object class="GtkSpinButton" id="spin_button">
+            <property name="adjustment">
+              <object class="GtkAdjustment">
+                <property name="lower">1</property>
+                <property name="upper">120</property>
+                <property name="value">2</property>
+                <property name="page-increment">10</property>
+                <property name="step-increment">1</property>
+              </object>
+            </property>
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkLabel">
+            <property name="label">Size (px)</property>
+          </object>
+        </child>
+      </object>
+    </child>
+
+    <style>
+      <class name="toolbar" />
+      <class name="frame" />
+    </style>
+  </template>
 </interface>

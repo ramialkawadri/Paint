@@ -52,6 +52,35 @@ on_toolbar_file_save (Toolbar *toolbar,
   canvas_region_save_new_file (self->canvas_region);
 }
 
+static char *
+get_window_title (gboolean is_file_saved,
+                  char    *file_name)
+{
+  g_autoptr (GFile) file;
+  char *file_name_to_show;
+
+  if (file_name == NULL)
+    return "*Paint - Untitled";
+    
+  file = g_file_parse_name (file_name);
+  file_name_to_show = g_file_get_basename (file);
+
+  if (is_file_saved)
+    return g_strdup_printf ("Paint - %s", file_name_to_show);
+  else
+    return g_strdup_printf ("*Paint - %s", file_name_to_show);
+}
+
+static void
+on_canvas_region_file_save_status_change (CanvasRegion *self,
+                                          gboolean      is_file_saved,
+                                          gpointer      user_data)
+{
+  char *current_file_name = canvas_region_get_current_file_name (self);
+  gtk_window_set_title (user_data,
+                        get_window_title (is_file_saved, current_file_name));
+}
+
 static void
 paint_window_class_init (PaintWindowClass *klass)
 {
@@ -66,6 +95,7 @@ paint_window_class_init (PaintWindowClass *klass)
 
   gtk_widget_class_bind_template_callback (widget_class, on_toolbar_file_open);
   gtk_widget_class_bind_template_callback (widget_class, on_toolbar_file_save);
+  gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_file_save_status_change);
 
   g_type_ensure (PAINT_TYPE_CANVAS_REGION);
   g_type_ensure (PAINT_TYPE_TOOLBAR);
