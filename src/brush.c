@@ -28,7 +28,7 @@ on_brush_draw_start_click (CanvasRegion *self,
   cairo_arc (cr,
              draw_event->current_x,
              draw_event->current_y,
-             draw_event->draw_size,
+             draw_event->draw_size / 2,
              0, 2 * G_PI);
   cairo_fill (cr);
 }
@@ -70,7 +70,7 @@ draw_along_x_axis (cairo_t   *cr,
   y = draw_event->last_y;
   end_x = draw_event->current_x;
    
-  r = draw_event->draw_size;
+  r = draw_event->draw_size / 2;
 
   if (draw_event->last_x > draw_event->current_x)
     {
@@ -82,7 +82,7 @@ draw_along_x_axis (cairo_t   *cr,
 
   while (x <= end_x)
     {
-      cairo_arc (cr, x, y, draw_event->draw_size, 0, 2 * G_PI);
+      cairo_arc (cr, x, y, r, 0, 2 * G_PI);
       cairo_fill (cr);
 
       x = get_next_point_on_line_with_distance_d (m, b, x, r / 2);
@@ -119,7 +119,7 @@ draw_along_y_axis (cairo_t   *cr,
   y = draw_event->last_y;
   end_y = draw_event->current_y;
 
-  r = draw_event->draw_size;
+  r = draw_event->draw_size / 2;
 
   if (draw_event->last_y > draw_event->current_y)
     {
@@ -131,7 +131,7 @@ draw_along_y_axis (cairo_t   *cr,
 
   while (y <= end_y)
     {
-      cairo_arc (cr, x, y, draw_event->draw_size, 0, 2 * G_PI);
+      cairo_arc (cr, x, y, r, 0, 2 * G_PI);
       cairo_fill (cr);
 
       y = get_next_point_on_line_with_distance_d (m, b, y, r / 2);

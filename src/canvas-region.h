@@ -57,4 +57,8 @@ void                canvas_region_prompt_to_save_current_file (CanvasRegion     
 void                canvas_region_set_selected_tool           (CanvasRegion       *self,
                                                                DRAWING_TOOL        tool);
 
+GtkPopover         *canvas_region_get_text_popver             (CanvasRegion       *self);
+char               *canvas_region_get_text_popver_text        (CanvasRegion       *self);
+
 G_END_DECLS
+

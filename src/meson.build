@@ -7,6 +7,7 @@ paint_sources = [
     'paint-application.c',
     'paint-window.c',
     'rectangle.c',
+    'text.c',
     'toolbar.c',
 ]
 

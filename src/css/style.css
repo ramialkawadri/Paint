@@ -14,3 +14,21 @@
 .drawing-area {
     box-shadow: rgba(0, 0, 0, 0.12) 8px 8px 8px;
 }
+
+.text-view {
+  border-radius: 6px;
+  padding: 6px;
+
+  outline-color: alpha(@accent_color, .3);
+  outline-width: 2px;
+  outline-offset: -2px;
+  outline-style: solid;
+}
+
+.text-view:hover {
+  outline-color: alpha(@accent_color, .5);
+}
+
+.text-view:focus-within {
+  outline-color: alpha(@accent_color, .7);
+}

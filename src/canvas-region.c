@@ -25,6 +25,7 @@
 #include "rectangle.h"
 #include "circle.h"
 #include "line.h"
+#include "text.h"
 
 #include "toolbar.h"
 
@@ -39,6 +40,8 @@ struct _CanvasRegion
   GtkBox              parent_type;
   GtkDrawingArea     *drawing_area;
   Toolbar            *toolbar;
+  GtkPopover         *text_popover;
+  GtkTextView        *text_popover_text_view;
 
   /* Controllers */
   GtkGestureDrag     *gesture_drag;
@@ -95,6 +98,18 @@ copy_surface (cairo_surface_t *src) {
   cairo_destroy (cr);
 
   return dst;
+}
+
+static void
+save_and_destroy_current_surface (CanvasRegion *self)
+{
+   if (self->cairo_surface != NULL)
+    {
+      cairo_surface_destroy (self->cairo_surface_save);
+      self->cairo_surface_save = copy_surface (self->cairo_surface);
+      cairo_surface_destroy (self->cairo_surface);
+      self->cairo_surface = NULL;
+    }
 }
 
 static void
@@ -412,7 +427,6 @@ on_gesture_drag_update (GtkGestureDrag *gesture,
     {
       if (self->cairo_surface)
         cairo_surface_destroy (self->cairo_surface);
-      self->cairo_surface = NULL;
       self->cairo_surface = copy_surface (self->cairo_surface_save);
       cr = cairo_create (self->cairo_surface);
     }
@@ -452,16 +466,59 @@ on_gesture_drag_end (GtkGestureDrag *gesture,
                      gpointer        user_data)
 {
   CanvasRegion *self = user_data;
-
-  if (self->cairo_surface != NULL)
-    {
-      cairo_surface_destroy (self->cairo_surface_save);
-      self->cairo_surface_save = copy_surface (self->cairo_surface);
-      cairo_surface_destroy (self->cairo_surface);
-      self->cairo_surface = NULL;
-    }
-
+  save_and_destroy_current_surface (self);
   set_is_current_file_saved (self, false);
+}
+
+static void
+on_text_popover_close  (GtkPopover *popover,
+                        gpointer    user_data)
+{
+  CanvasRegion *self;
+  GtkTextBuffer *buffer;
+
+  self = user_data;
+  buffer = gtk_text_view_get_buffer (self->text_popover_text_view);
+
+  cairo_surface_destroy (self->cairo_surface);
+  self->cairo_surface = NULL;
+  gtk_widget_queue_draw (GTK_WIDGET (self->drawing_area));
+  gtk_text_buffer_set_text (buffer, "", 0);
+}
+
+static void
+on_text_popover_text_change (GtkTextBuffer *text_buffer,
+                             gpointer       user_data)
+{
+  cairo_t *cr;
+  CanvasRegion *self;
+  char *text;
+
+  self = user_data;
+  text = canvas_region_get_text_popver_text (self);
+
+  if (strlen (text) == 0)
+    return;
+
+  if (self->cairo_surface)
+    cairo_surface_destroy (self->cairo_surface);
+
+  self->cairo_surface = copy_surface (self->cairo_surface_save);
+
+  cr = cairo_create (self->cairo_surface);
+  gdk_cairo_set_source_rgba (cr, toolbar_get_current_color(self->toolbar));
+  self->draw_cb (self, cr, &self->draw_event);
+  cairo_destroy (cr);
+
+  gtk_widget_queue_draw (GTK_WIDGET (self->drawing_area));
+}
+
+static void
+on_text_popover_submit    (GtkButton    *button,
+                           CanvasRegion *self)
+{
+  save_and_destroy_current_surface (self);
+  gtk_popover_popdown (self->text_popover);
 }
 
 void
@@ -594,12 +651,34 @@ canvas_region_set_selected_tool (CanvasRegion *self,
       break;
     
     case TEXT:
+      self->is_erasing = false;
+      self->save_while_drawing = false;
+      self->draw_start_click_cb = &on_text_draw_start_click;
+      self->draw_cb = &on_text_draw;
       break;
 
     default:
       g_message ("Unknown tool %d", tool);
       break;
   }
+}
+
+GtkPopover *
+canvas_region_get_text_popver (CanvasRegion *self)
+{
+  return self->text_popover;
+}
+
+char *
+canvas_region_get_text_popver_text (CanvasRegion *self)
+{
+  GtkTextBuffer *buffer = NULL;
+  gchar *text;
+
+  buffer = gtk_text_view_get_buffer (self->text_popover_text_view);
+  g_object_get (G_OBJECT (buffer), "text", &text, NULL);
+
+  return text;
 }
 
 static void
@@ -647,13 +726,17 @@ canvas_region_class_init (CanvasRegionClass *klass)
   gtk_widget_class_bind_template_child (widget_class, CanvasRegion, drawing_area);
   gtk_widget_class_bind_template_child (widget_class, CanvasRegion, gesture_drag);
   gtk_widget_class_bind_template_child (widget_class, CanvasRegion, gesture_click);
+  gtk_widget_class_bind_template_child (widget_class, CanvasRegion, text_popover);
+  gtk_widget_class_bind_template_child (widget_class, CanvasRegion, text_popover_text_view);
 
   /* Callbacks */
   gtk_widget_class_bind_template_callback (widget_class, on_mouse_press);
-
   gtk_widget_class_bind_template_callback (widget_class, on_gesture_drag_begin);
   gtk_widget_class_bind_template_callback (widget_class, on_gesture_drag_update);
   gtk_widget_class_bind_template_callback (widget_class, on_gesture_drag_end);
+  gtk_widget_class_bind_template_callback (widget_class, on_text_popover_close);
+  gtk_widget_class_bind_template_callback (widget_class, on_text_popover_submit);
+  gtk_widget_class_bind_template_callback (widget_class, on_text_popover_text_change);
 
   G_OBJECT_CLASS (klass)->dispose = canvas_region_dispose;
 
@@ -668,3 +751,4 @@ canvas_region_class_init (CanvasRegionClass *klass)
                                                                  1,
                                                                  G_TYPE_BOOLEAN);
 }
+
