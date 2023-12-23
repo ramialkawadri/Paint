@@ -32,9 +32,55 @@ struct _PaintWindow
   AdwHeaderBar        *header_bar;
   Toolbar             *toolbar;
   CanvasRegion        *canvas_region;
+
+  /* Metadata */
+  gboolean             force_close;
 };
 
 G_DEFINE_FINAL_TYPE (PaintWindow, paint_window, ADW_TYPE_APPLICATION_WINDOW)
+
+static void
+on_save_finish (CanvasRegion *canvas_region)
+{
+  GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (canvas_region));
+  gtk_window_close (GTK_WINDOW (root));
+}
+
+static void
+on_prompt_to_save_response_file_open (AdwMessageDialog *dialog,
+                                      gchar            *response,
+                                      gpointer          user_data)
+{
+  PaintWindow *self = user_data;
+
+  if (g_strcmp0 (response, "cancel") == 0)
+    {
+      return;
+    }
+
+  self->force_close = true;
+
+  if (g_strcmp0 (response, "discard") == 0)
+    gtk_window_close (user_data);
+  else if (g_strcmp0 (response, "save") == 0)
+    canvas_region_save_file (self->canvas_region, on_save_finish);
+}
+
+static gboolean
+on_close_request (GtkWindow *window,
+                  gpointer   user_data)
+{
+  PaintWindow *self = user_data;
+
+  if (canvas_region_is_current_file_saved (self->canvas_region) || self->force_close)
+    return false;
+
+  canvas_region_prompt_to_save_current_file (self->canvas_region,
+                                             G_CALLBACK (on_prompt_to_save_response_file_open),
+                                             self);
+
+  return true;
+}
 
 static void
 on_toolbar_file_open (Toolbar *toolbar,
@@ -49,10 +95,10 @@ on_toolbar_file_save (Toolbar *toolbar,
                       gpointer user_data)
 {
   PaintWindow *self = user_data;
-  canvas_region_save_new_file (self->canvas_region);
+  canvas_region_save_file (self->canvas_region, NULL);
 }
 
-static char *
+static const char *
 get_window_title (gboolean is_file_saved,
                   char    *file_name)
 {
@@ -93,6 +139,7 @@ paint_window_class_init (PaintWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, PaintWindow, toolbar);
   gtk_widget_class_bind_template_child (widget_class, PaintWindow, canvas_region);
 
+  gtk_widget_class_bind_template_callback (widget_class, on_close_request);
   gtk_widget_class_bind_template_callback (widget_class, on_toolbar_file_open);
   gtk_widget_class_bind_template_callback (widget_class, on_toolbar_file_save);
   gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_file_save_status_change);

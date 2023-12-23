@@ -37,12 +37,20 @@ typedef void (*on_draw)             (CanvasRegion *self,
                                      cairo_t      *cr,
                                      DrawEvent    *draw_event);
 
-void                canvas_region_set_toolbar            (CanvasRegion *self,
-                                                          Toolbar      *toolbar);
+typedef void (*on_file_save_finish) (CanvasRegion *self);
 
-void                canvas_region_open_new_file          (CanvasRegion *self);
-void                canvas_region_save_new_file          (CanvasRegion *self);
+void                canvas_region_set_toolbar                 (CanvasRegion       *self,
+                                                              Toolbar             *toolbar);
 
-char               *canvas_region_get_current_file_name  (CanvasRegion *self);
+void                canvas_region_open_new_file               (CanvasRegion       *self);
+void                canvas_region_save_file                   (CanvasRegion       *self,
+                                                               on_file_save_finish on_save_finish);
+
+char               *canvas_region_get_current_file_name       (CanvasRegion       *self);
+gboolean            canvas_region_is_current_file_saved       (CanvasRegion       *self);
+
+void                canvas_region_prompt_to_save_current_file (CanvasRegion       *self,
+                                                               GCallback           on_response,
+                                                               gpointer            user_data);
 
 G_END_DECLS

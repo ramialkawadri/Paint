@@ -8,6 +8,9 @@
     <property name="default-height">700</property>
     <property name="title">Paint</property>
 
+    <signal name="close_request" handler="on_close_request" object="PaintWindow"
+      swapped="no" />
+
     <property name="content">
       <object class="AdwToolbarView">
         <child type="top">

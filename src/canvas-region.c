@@ -114,10 +114,10 @@ load_file (CanvasRegion *self,
   gtk_widget_queue_draw (GTK_WIDGET(self->drawing_area));
 }
 
-static void
-prompt_to_save_current_file (CanvasRegion *self,
-                             GCallback     on_response,
-                             gpointer      user_data)
+void
+canvas_region_prompt_to_save_current_file (CanvasRegion *self,
+                                           GCallback     on_response,
+                                           gpointer      user_data)
 {
   GtkWidget *dialog;
   GtkRoot *root;
@@ -246,7 +246,9 @@ on_file_dialog_open_finish (GObject      *source_object,
       cb_data->self = self;
       cb_data->user_data = filename;
 
-      prompt_to_save_current_file (self, G_CALLBACK (on_prompt_to_save_response_file_open), cb_data);
+      canvas_region_prompt_to_save_current_file (self,
+                                                G_CALLBACK (on_prompt_to_save_response_file_open),
+                                                cb_data);
     }
   else
     {
@@ -260,11 +262,20 @@ on_file_dialog_save_finish (GObject      *source_object,
                             gpointer      data)
 {
   CanvasRegionUserData *cb_data;
+  on_file_save_finish finish_cb;
+
   cb_data = data;
 
   save_canvas_from_file_dialog_save_result (cb_data->self,
                                             source_object,
                                             res);
+
+  if (cb_data->user_data != NULL)
+    {
+      finish_cb = cb_data->user_data;
+      finish_cb (cb_data->self);
+    }
+
   g_free (cb_data);
 }
 
@@ -395,6 +406,12 @@ canvas_region_get_current_file_name (CanvasRegion *self)
   return self->current_filename;
 }
 
+gboolean
+canvas_region_is_current_file_saved (CanvasRegion *self)
+{
+  return self->is_current_file_saved;
+}
+
 void
 canvas_region_open_new_file (CanvasRegion *self)
 {
@@ -445,16 +462,21 @@ show_save_file_dialog (CanvasRegion         *self,
 }
 
 void
-canvas_region_save_new_file (CanvasRegion *self)
+canvas_region_save_file (CanvasRegion           *self,
+                         on_file_save_finish     on_save_finish)
 {
   if (self->current_filename != NULL)
     {
       save_canvas (self);
+
+      if (on_save_finish != NULL)
+        on_save_finish (self);
     }
   else
     {
       CanvasRegionUserData *cb_data = g_malloc (sizeof (CanvasRegionUserData));
       cb_data->self = self;
+      cb_data->user_data = on_save_finish;
       show_save_file_dialog (self, on_file_dialog_save_finish, cb_data);
     }
 }
