@@ -54,10 +54,11 @@ struct _CanvasRegion
   int                 height;
   char               *current_filename;
   gboolean            is_current_file_saved;
+  gboolean            is_erasing;
 };
 
 enum {
-  ON_FILE_SAVE_STATUS_CHANGE,
+  FILE_SAVE_STATUS_CHANGE,
   NUMBER_OF_SIGNALS
 };
 
@@ -82,7 +83,7 @@ set_is_current_file_saved (CanvasRegion *self,
 {
   self->is_current_file_saved = is_current_file_saved;
   g_signal_emit (self,
-                 canvas_region_signals[ON_FILE_SAVE_STATUS_CHANGE],
+                 canvas_region_signals[FILE_SAVE_STATUS_CHANGE],
                  0, is_current_file_saved);
 }
 
@@ -310,6 +311,12 @@ on_mouse_press (GtkGestureClick *gesture,
 {
   CanvasRegion *self;
   cairo_t *cr;
+  GdkRGBA white_color;
+
+  white_color.red = 1.0;
+  white_color.green = 1.0;
+  white_color.blue = 1.0;
+  white_color.alpha = 1.0;
 
   self = user_data;
 
@@ -323,7 +330,11 @@ on_mouse_press (GtkGestureClick *gesture,
   self->draw_event.current_x = x;
   self->draw_event.current_y = y;
 
-  gdk_cairo_set_source_rgba (cr, toolbar_get_current_color(self->toolbar));
+  if (self->is_erasing)
+    gdk_cairo_set_source_rgba (cr, &white_color);
+  else
+    gdk_cairo_set_source_rgba (cr, toolbar_get_current_color(self->toolbar));
+
   update_draw_event_from_toolbar (self);
 
   self->draw_start_click_cb (self, cr, &self->draw_event);
@@ -359,6 +370,7 @@ on_gesture_drag_update (GtkGestureDrag *gesture,
 {
   CanvasRegion *self;
   cairo_t *cr;
+  GdkRGBA white_color;
 
   self = user_data;
   cr = cairo_create (self->cairo_surface);
@@ -369,7 +381,16 @@ on_gesture_drag_update (GtkGestureDrag *gesture,
   self->draw_event.current_x = self->draw_event.start_x + offset_x;
   self->draw_event.current_y = self->draw_event.start_y + offset_y;
 
-  gdk_cairo_set_source_rgba (cr, toolbar_get_current_color(self->toolbar));
+  white_color.red = 1.0;
+  white_color.green = 1.0;
+  white_color.blue = 1.0;
+  white_color.alpha = 1.0;
+
+  if (self->is_erasing)
+    gdk_cairo_set_source_rgba (cr, &white_color);
+  else
+    gdk_cairo_set_source_rgba (cr, toolbar_get_current_color(self->toolbar));
+
   update_draw_event_from_toolbar (self);
 
   self->draw_cb (self, cr, &self->draw_event);
@@ -481,6 +502,34 @@ canvas_region_save_file (CanvasRegion           *self,
     }
 }
 
+void
+canvas_region_set_selected_tool (CanvasRegion *self,
+                                 DRAWING_TOOL  tool)
+{
+  switch (tool)
+    {
+    case BRUSH:
+      self->is_erasing = false;
+      self->draw_start_click_cb = &on_brush_draw_start_click;
+      self->draw_cb = &on_brush_draw;
+      break;
+
+    case ERASER:
+      self->is_erasing = true;
+      self->draw_start_click_cb = &on_brush_draw_start_click;
+      self->draw_cb = &on_brush_draw;
+      break;
+
+    case RECTANGLE:
+      self->is_erasing = false;
+      break;
+
+    case CIRCLE:
+      self->is_erasing = false;
+      break;
+  }
+}
+
 static void
 canvas_region_init (CanvasRegion *self)
 {
@@ -535,14 +584,14 @@ canvas_region_class_init (CanvasRegionClass *klass)
 
   G_OBJECT_CLASS (klass)->dispose = canvas_region_dispose;
 
-  canvas_region_signals[ON_FILE_SAVE_STATUS_CHANGE] = g_signal_new ("on-file-save-status-change",
-                                                                    G_TYPE_FROM_CLASS (klass),
-                                                                    G_SIGNAL_RUN_LAST,
-                                                                    0,
-                                                                    NULL,
-                                                                    NULL,
-                                                                    NULL,
-                                                                    G_TYPE_NONE,
-                                                                    1,
-                                                                    G_TYPE_BOOLEAN);
+  canvas_region_signals[FILE_SAVE_STATUS_CHANGE] = g_signal_new ("on-file-save-status-change",
+                                                                 G_TYPE_FROM_CLASS (klass),
+                                                                 G_SIGNAL_RUN_LAST,
+                                                                 0,
+                                                                 NULL,
+                                                                 NULL,
+                                                                 NULL,
+                                                                 G_TYPE_NONE,
+                                                                 1,
+                                                                 G_TYPE_BOOLEAN);
 }

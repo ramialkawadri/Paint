@@ -21,6 +21,7 @@
 #include "config.h"
 
 #include "toolbar.h"
+#include "drawing-tool.h"
 
 struct _Toolbar
 {
@@ -28,11 +29,20 @@ struct _Toolbar
   GtkBox                parent_type;
   GtkColorDialogButton *color_button;
   GtkSpinButton        *spin_button;
+
+  /* Drawing tools buttons */
+  GtkButton            *currently_selected_button;
+
+  GtkButton            *brush_button;
+  GtkButton            *eraser_button;
+  GtkButton            *rectangle_button;
+  GtkButton            *circle_button;
 };
 
 enum {
   OPEN_FILE,
   SAVE_FILE,
+  TOOL_CHANGE,
   NUMBER_OF_SIGNALS
 };
 
@@ -57,6 +67,58 @@ on_save_button_click (GtkButton *button,
   g_signal_emit (self, toolbar_signals[SAVE_FILE], 0);
 }
 
+static void
+update_current_selected_tool (Toolbar   *self,
+                              GtkButton *selected_tool)
+{
+  gtk_widget_remove_css_class (GTK_WIDGET (self->currently_selected_button),
+                               "suggested-action");
+
+  self->currently_selected_button = selected_tool;
+
+  gtk_widget_add_css_class (GTK_WIDGET (selected_tool), "suggested-action");
+}
+
+static void
+on_brush_button_click (GtkButton *button,
+                       gpointer   user_data)
+{
+  Toolbar *self = user_data;
+
+  update_current_selected_tool (self, self->brush_button);
+  g_signal_emit (self, toolbar_signals[TOOL_CHANGE], 0, BRUSH);
+}
+
+static void
+on_eraser_button_click (GtkButton *button,
+                       gpointer   user_data)
+{
+  Toolbar *self = user_data;
+
+  update_current_selected_tool (self, self->eraser_button);
+  g_signal_emit (self, toolbar_signals[TOOL_CHANGE], 0, ERASER);
+}
+
+static void
+on_rectangle_button_click (GtkButton *button,
+                           gpointer   user_data)
+{
+  Toolbar *self = user_data;
+
+  update_current_selected_tool (self, self->rectangle_button);
+  g_signal_emit (self, toolbar_signals[TOOL_CHANGE], 0, RECTANGLE);
+}
+
+static void
+on_circle_button_click (GtkButton *button,
+                        gpointer   user_data)
+{
+  Toolbar *self = user_data;
+
+  update_current_selected_tool (self, self->circle_button);
+  g_signal_emit (self, toolbar_signals[TOOL_CHANGE], 0, CIRCLE);
+}
+
 const GdkRGBA *
 toolbar_get_current_color (Toolbar *self)
 {
@@ -73,6 +135,8 @@ static void
 toolbar_init (Toolbar *self)
 {
   gtk_widget_init_template (GTK_WIDGET(self));
+
+  self->currently_selected_button = self->brush_button;
 }
 
 static void
@@ -93,14 +157,21 @@ toolbar_class_init (ToolbarClass *klass)
 
   gtk_widget_class_bind_template_child (widget_class, Toolbar, color_button);
   gtk_widget_class_bind_template_child (widget_class, Toolbar, spin_button);
+  gtk_widget_class_bind_template_child (widget_class, Toolbar, brush_button);
+  gtk_widget_class_bind_template_child (widget_class, Toolbar, eraser_button);
+  gtk_widget_class_bind_template_child (widget_class, Toolbar, rectangle_button);
+  gtk_widget_class_bind_template_child (widget_class, Toolbar, circle_button);
 
   gtk_widget_class_bind_template_callback (widget_class, on_open_button_click);
   gtk_widget_class_bind_template_callback (widget_class, on_save_button_click);
+  gtk_widget_class_bind_template_callback (widget_class, on_brush_button_click);
+  gtk_widget_class_bind_template_callback (widget_class, on_eraser_button_click);
+  gtk_widget_class_bind_template_callback (widget_class, on_rectangle_button_click);
+  gtk_widget_class_bind_template_callback (widget_class, on_circle_button_click);
 
   G_OBJECT_CLASS (klass)->dispose = toolbar_dispose;
 
   /* Signals */
-
   toolbar_signals[OPEN_FILE] = g_signal_new ("open-file",
                                              G_TYPE_FROM_CLASS (klass),
                                              G_SIGNAL_RUN_LAST,
@@ -120,4 +191,15 @@ toolbar_class_init (ToolbarClass *klass)
                                              NULL,
                                              G_TYPE_NONE,
                                              0);
+
+  toolbar_signals[TOOL_CHANGE] = g_signal_new ("tool-change",
+                                               G_TYPE_FROM_CLASS (klass),
+                                               G_SIGNAL_RUN_LAST,
+                                               0,
+                                               NULL,
+                                               NULL,
+                                               NULL,
+                                               G_TYPE_NONE,
+                                               1,
+                                               G_TYPE_INT);
 }

@@ -74,6 +74,102 @@
     </child>
 
     <child>
+      <object class="GtkSeparator">
+        <style>
+          <class name="vertical" />
+        </style>
+      </object>
+    </child>
+
+    <child>
+      <object class="GtkGrid">
+        <!--Brush-->
+        <child>
+          <object class="GtkButton" id="brush_button">
+            <signal name="clicked" handler="on_brush_button_click" object="Toolbar"
+              swapped="no" />
+            <property name="child">
+              <object class="AdwButtonContent">
+                <property name="icon-name">paintbrush-symbolic</property>
+                <property name="use-underline">True</property>
+              </object>
+            </property>
+
+            <layout>
+              <property name="column">0</property>
+              <property name="row">0</property>
+            </layout>
+
+            <style>
+              <class name="suggested-action" />
+            </style>
+          </object>
+        </child>
+
+        <!--Eraser-->
+        <child>
+          <object class="GtkButton" id="eraser_button">
+            <signal name="clicked" handler="on_eraser_button_click" object="Toolbar"
+              swapped="no" />
+            <property name="child">
+              <object class="AdwButtonContent">
+                <property name="icon-name">eraser5-symbolic</property>
+                <property name="use-underline">True</property>
+              </object>
+            </property>
+
+            <layout>
+              <property name="column">0</property>
+              <property name="row">1</property>
+            </layout>
+          </object>
+        </child>
+
+
+        <!--Rectangle-->
+        <child>
+          <object class="GtkButton" id="rectangle_button">
+            <signal name="clicked" handler="on_rectangle_button_click" object="Toolbar"
+              swapped="no" />
+            <property name="child">
+              <object class="AdwButtonContent">
+                <property name="icon-name">square-outline-thick-symbolic</property>
+                <property name="use-underline">True</property>
+              </object>
+            </property>
+
+            <layout>
+              <property name="column">1</property>
+              <property name="row">0</property>
+            </layout>
+          </object>
+        </child>
+
+        <!--Circle-->
+        <child>
+          <object class="GtkButton" id="circle_button">
+            <signal name="clicked" handler="on_circle_button_click" object="Toolbar"
+              swapped="no" />
+            <property name="child">
+              <object class="AdwButtonContent">
+                <property name="icon-name">circle-outline-thick-symbolic</property>
+                <property name="use-underline">True</property>
+              </object>
+            </property>
+
+            <layout>
+              <property name="column">1</property>
+              <property name="row">1</property>
+            </layout>
+          </object>
+        </child>
+
+      </object>
+    </child>
+
+
+
+    <child>
       <object class="GtkBox">
         <property name="orientation">vertical</property>
         <property name="spacing">6</property>

@@ -23,6 +23,7 @@
 #include <adwaita.h>
 #include "draw-event.h"
 #include "toolbar.h"
+#include "drawing-tool.h"
 
 G_BEGIN_DECLS
 
@@ -52,5 +53,8 @@ gboolean            canvas_region_is_current_file_saved       (CanvasRegion     
 void                canvas_region_prompt_to_save_current_file (CanvasRegion       *self,
                                                                GCallback           on_response,
                                                                gpointer            user_data);
+
+void                canvas_region_set_selected_tool           (CanvasRegion       *self,
+                                                               DRAWING_TOOL        tool);
 
 G_END_DECLS

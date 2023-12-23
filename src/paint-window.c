@@ -23,6 +23,7 @@
 #include "paint-window.h"
 #include "toolbar.h"
 #include "canvas-region.h"
+#include "drawing-tool.h"
 
 struct _PaintWindow
 {
@@ -98,6 +99,15 @@ on_toolbar_file_save (Toolbar *toolbar,
   canvas_region_save_file (self->canvas_region, NULL);
 }
 
+static void
+on_toolbar_tool_change (Toolbar     *toolbar,
+                        DRAWING_TOOL selected_tool,
+                        gpointer     user_data)
+{
+  PaintWindow *self = user_data;
+  canvas_region_set_selected_tool (self->canvas_region, selected_tool);
+}
+
 static const char *
 get_window_title (gboolean is_file_saved,
                   char    *file_name)
@@ -142,6 +152,7 @@ paint_window_class_init (PaintWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_close_request);
   gtk_widget_class_bind_template_callback (widget_class, on_toolbar_file_open);
   gtk_widget_class_bind_template_callback (widget_class, on_toolbar_file_save);
+  gtk_widget_class_bind_template_callback (widget_class, on_toolbar_tool_change);
   gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_file_save_status_change);
 
   g_type_ensure (PAINT_TYPE_CANVAS_REGION);
