@@ -495,7 +495,7 @@ on_text_popover_text_change (GtkTextBuffer *text_buffer,
   char *text;
 
   self = user_data;
-  text = canvas_region_get_text_popver_text (self);
+  text = canvas_region_get_text_popover_text (self);
 
   if (strlen (text) == 0)
     return;
@@ -664,13 +664,13 @@ canvas_region_set_selected_tool (CanvasRegion *self,
 }
 
 GtkPopover *
-canvas_region_get_text_popver (CanvasRegion *self)
+canvas_region_get_text_popover (CanvasRegion *self)
 {
   return self->text_popover;
 }
 
 char *
-canvas_region_get_text_popver_text (CanvasRegion *self)
+canvas_region_get_text_popover_text (CanvasRegion *self)
 {
   GtkTextBuffer *buffer = NULL;
   gchar *text;

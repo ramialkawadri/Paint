@@ -26,7 +26,7 @@ void on_text_draw_start_click (CanvasRegion *self,
                                cairo_t *cr,
                                DrawEvent *draw_event)
 {
-  GtkPopover *text_popover = canvas_region_get_text_popver (self);
+  GtkPopover *text_popover = canvas_region_get_text_popover (self);
   GdkRectangle rect;
   rect.x = draw_event->current_x;
   rect.y = draw_event->current_y;
@@ -41,7 +41,7 @@ void on_text_draw             (CanvasRegion *self,
                                cairo_t *cr,
                                DrawEvent *draw_event)
 {
-  gchar *text = canvas_region_get_text_popver_text (self);
+  gchar *text = canvas_region_get_text_popover_text (self);
 
   cairo_set_font_size (cr, draw_event->draw_size * 1.33);
   cairo_move_to (cr, draw_event->current_x, draw_event->current_y);

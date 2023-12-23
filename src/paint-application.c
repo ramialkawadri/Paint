@@ -74,7 +74,7 @@ paint_application_about_action (GSimpleAction *action,
                                 GVariant      *parameter,
                                 gpointer       user_data)
 {
-  static const char *developers[] = {"Ramikw", NULL};
+  static const char *developers[] = { "Ramikw", NULL };
   PaintApplication *self = user_data;
   GtkWindow *window = NULL;
 
@@ -83,7 +83,7 @@ paint_application_about_action (GSimpleAction *action,
   window = gtk_application_get_active_window (GTK_APPLICATION(self));
 
   adw_show_about_window (window,
-                         "application-name", "paint",
+                         "application-name", "Paint",
                          "application-icon", "org.gnome.paint",
                          "developer-name", "Ramikw",
                          "version", "0.1.0",
@@ -93,20 +93,53 @@ paint_application_about_action (GSimpleAction *action,
 }
 
 static void
-paint_application_quit_action (GSimpleAction *action,
+paint_application_exit_action (GSimpleAction *action,
                                GVariant      *parameter,
                                gpointer       user_data)
 {
   PaintApplication *self = user_data;
+  GtkWindow *window = NULL;
+
+  g_assert (PAINT_IS_APPLICATION(self));
+  window = gtk_application_get_active_window (GTK_APPLICATION(self));
+  gtk_window_close (window);
+
+}
+
+static void
+paint_application_save_action (GSimpleAction *action,
+                               GVariant      *parameter,
+                               gpointer       user_data)
+{
+  PaintApplication *self = user_data;
+  GtkWindow *window = NULL;
 
   g_assert (PAINT_IS_APPLICATION(self));
 
-  g_application_quit (G_APPLICATION(self));
+  window = gtk_application_get_active_window (GTK_APPLICATION(self));
+  paint_window_save_current_file (PAINT_WINDOW (window));
+}
+
+static void
+paint_application_open_action (GSimpleAction *action,
+                               GVariant      *parameter,
+                               gpointer       user_data)
+{
+  PaintApplication *self = user_data;
+  GtkWindow *window = NULL;
+
+  g_assert (PAINT_IS_APPLICATION(self));
+
+  window = gtk_application_get_active_window (GTK_APPLICATION(self));
+
+  paint_window_open_new_file (PAINT_WINDOW (window));
 }
 
 static const GActionEntry app_actions[] = {
-    {"quit", paint_application_quit_action},
+    {"exit", paint_application_exit_action},
     {"about", paint_application_about_action},
+    {"save", paint_application_save_action},
+    {"open", paint_application_open_action},
 };
 
 static void
@@ -116,7 +149,16 @@ paint_application_init (PaintApplication *self)
                                    app_actions,
                                    G_N_ELEMENTS (app_actions),
                                    self);
+
   gtk_application_set_accels_for_action (GTK_APPLICATION(self),
-                                         "app.quit",
-                                         (const char *[]){"<primary>q", NULL});
+                                         "app.save",
+                                         (const char *[]){"<primary>s", NULL});
+
+  gtk_application_set_accels_for_action (GTK_APPLICATION(self),
+                                         "app.open",
+                                         (const char *[]){"<primary>o", NULL});
+
+  gtk_application_set_accels_for_action (GTK_APPLICATION(self),
+                                         "app.exit",
+                                         (const char *[]){"<primary>w", NULL});
 }

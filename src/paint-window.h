@@ -28,4 +28,7 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (PaintWindow, paint_window, PAINT, WINDOW, AdwApplicationWindow)
 
+void paint_window_save_current_file (PaintWindow *self);
+void paint_window_open_new_file     (PaintWindow *self);
+
 G_END_DECLS

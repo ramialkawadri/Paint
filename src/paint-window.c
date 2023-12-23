@@ -139,6 +139,18 @@ on_canvas_region_file_save_status_change (CanvasRegion *self,
                         get_window_title (is_file_saved, current_file_name));
 }
 
+void
+paint_window_save_current_file (PaintWindow *self)
+{
+  canvas_region_save_file (self->canvas_region, NULL);
+}
+
+void
+paint_window_open_new_file (PaintWindow *self)
+{
+  canvas_region_open_new_file (self->canvas_region);
+}
+
 static void
 paint_window_class_init (PaintWindowClass *klass)
 {
