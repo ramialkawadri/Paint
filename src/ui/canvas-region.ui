@@ -13,7 +13,7 @@
 
         <child>
           <object class="GtkGestureClick">
-            <signal name="pressed" handler="on_mouse_press" object="CanvasRegion"
+            <signal name="pressed" handler="drawing_area_on_mouse_press" object="CanvasRegion"
               swapped="no" />
           </object>
         </child>
@@ -113,13 +113,13 @@
     </child>
 
     <child>
-      <object class="AdwBin" id="canvas_region_corner">
+      <object class="AdwBin" id="resize_corner">
 
         <child>
           <object class="GtkGestureDrag">
-            <signal name="drag-update" handler="on_corner_drag_update"
+            <signal name="drag-update" handler="on_resize_corner_drag_update"
               object="CanvasRegion" swapped="no" />
-            <signal name="drag-end" handler="on_corner_drag_end" object="CanvasRegion"
+            <signal name="drag-end" handler="on_resize_corner_drag_end" object="CanvasRegion"
               swapped="no" />
           </object>
         </child>

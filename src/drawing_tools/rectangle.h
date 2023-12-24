@@ -1,6 +1,6 @@
 /* rectangle.h
  *
- * Copyright 2023 Ramikw
+ * Copyright 2023 Rami Alkawadri
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,8 @@
 #include "draw-event.h"
 
 void on_rectangle_draw_start_click (CanvasRegion *self,
-                                     cairo_t *cr,
-                                     DrawEvent *draw_event);
+                                    cairo_t *cr,
+                                    DrawEvent *draw_event);
 
 void on_rectangle_draw              (CanvasRegion *self,
                                      cairo_t *cr,

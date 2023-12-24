@@ -1,6 +1,6 @@
 /* canvas-region.c
  *
- * Copyright 2023 Ramikw
+ * Copyright 2023 Rami Alkawadri
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "config.h"
-
 #include "canvas-region.h"
 #include "toolbar.h"
 
@@ -28,6 +26,9 @@
 #include "drawing_tools/circle.h"
 #include "drawing_tools/line.h"
 #include "drawing_tools/text.h"
+
+#include "utils/cairo-utils.h"
+#include "utils/colors.h"
 
 typedef struct _CanvasRegionUserData {
   CanvasRegion *self;
@@ -42,7 +43,7 @@ struct _CanvasRegion
   Toolbar            *toolbar;
   GtkPopover         *text_popover;
   GtkTextView        *text_popover_text_view;
-  AdwBin             *canvas_region_corner;
+  AdwBin             *resize_corner;
 
   /* Draw */
   DrawEvent           draw_event;
@@ -63,7 +64,7 @@ struct _CanvasRegion
 };
 
 enum {
-  FILE_SAVE_STATUS_CHANGE,
+  SAVE_STATUS_CHANGE,
   NUMBER_OF_SIGNALS
 };
 
@@ -76,39 +77,18 @@ show_save_file_dialog (CanvasRegion       *self,
                        GAsyncReadyCallback cb,
                        CanvasRegionUserData *user_data);
 
-static cairo_surface_t *
-copy_surface (cairo_surface_t *src) {
-  cairo_surface_t *dst;
-  cairo_format_t format;
-  gdouble width;
-  gdouble height;
-  cairo_t *cr;
-
-  format = cairo_image_surface_get_format (src);
-  width = cairo_image_surface_get_width (src);
-  height = cairo_image_surface_get_height (src);
-  dst = cairo_image_surface_create (format, width, height);
-
-  cr = cairo_create (dst);
-  cairo_set_source_surface (cr, src, 0.0, 0.0);
-  cairo_paint (cr);
-  cairo_destroy (cr);
-
-  return dst;
-}
-
 static void
 save_and_destroy_current_surface (CanvasRegion *self)
 {
-   if (self->cairo_surface != NULL)
-    {
-      cairo_surface_destroy (self->cairo_surface_save);
-      self->cairo_surface_save = copy_surface (self->cairo_surface);
-      self->width = cairo_image_surface_get_width (self->cairo_surface);
-      self->height = cairo_image_surface_get_height (self->cairo_surface);
-      cairo_surface_destroy (self->cairo_surface);
-      self->cairo_surface = NULL;
-    }
+   if (self->cairo_surface == NULL)
+    return;
+
+  cairo_surface_destroy (self->cairo_surface_save);
+  self->cairo_surface_save = copy_cairo_surface (self->cairo_surface);
+  self->width = cairo_image_surface_get_width (self->cairo_surface);
+  self->height = cairo_image_surface_get_height (self->cairo_surface);
+  cairo_surface_destroy (self->cairo_surface);
+  self->cairo_surface = NULL;
 }
 
 static void
@@ -122,13 +102,15 @@ set_is_current_file_saved (CanvasRegion *self,
                            gboolean      is_current_file_saved)
 {
   self->is_current_file_saved = is_current_file_saved;
+
   g_signal_emit (self,
-                 canvas_region_signals[FILE_SAVE_STATUS_CHANGE],
-                 0, is_current_file_saved);
+                 canvas_region_signals[SAVE_STATUS_CHANGE],
+                 0,
+                 is_current_file_saved);
 }
 
 static void
-save_canvas (CanvasRegion *self)
+save_to_current_file (CanvasRegion *self)
 {
   if (self->is_current_file_saved)
     return;
@@ -138,7 +120,7 @@ save_canvas (CanvasRegion *self)
 }
 
 static void
-load_file (CanvasRegion *self,
+open_file (CanvasRegion *self,
            char         *filename)
 {
   cairo_surface_destroy (self->cairo_surface_save);
@@ -147,8 +129,8 @@ load_file (CanvasRegion *self,
   self->width = cairo_image_surface_get_width (self->cairo_surface_save);
   self->height = cairo_image_surface_get_height (self->cairo_surface_save);
   self->current_filename = filename;
-  set_is_current_file_saved (self, true);
 
+  set_is_current_file_saved (self, true);
   gtk_drawing_area_set_content_width (self->drawing_area, self->width);
   gtk_drawing_area_set_content_height (self->drawing_area, self->height);
 
@@ -208,31 +190,31 @@ save_canvas_from_file_dialog_save_result (CanvasRegion *self,
 
   filepath = g_file_get_path (file);
   self->current_filename = filepath;
-  save_canvas (self);
+  save_to_current_file (self);
 }
 
 static void
-prompt_to_save_on_file_dialog_save_finish (GObject      *source_object,
-                                           GAsyncResult *res,
-                                           gpointer      data)
+on_file_dialog_save_finish_save_and_open_file (GObject      *source_object,
+                                               GAsyncResult *res,
+                                               gpointer      user_data)
 {
-  CanvasRegionUserData *cb_data;
-  cb_data = data;
+  CanvasRegionUserData *cb_data = user_data;
 
-  save_canvas_from_file_dialog_save_result (cb_data->self,
-                                            source_object,
-                                            res);
-
-  load_file (cb_data->self, cb_data->user_data);
+  save_canvas_from_file_dialog_save_result (cb_data->self, source_object, res);
+  open_file (cb_data->self, cb_data->user_data);
   g_free (cb_data);
 }
 
 static void
-on_prompt_to_save_response_file_open (AdwMessageDialog *dialog,
-                                      gchar            *response,
-                                      gpointer          user_data)
+on_open_file_prompt_response (AdwMessageDialog *dialog,
+                              gchar            *response,
+                              gpointer          user_data)
 {
-  CanvasRegionUserData *cb_data = user_data;
+  CanvasRegionUserData *cb_data;
+  CanvasRegion *self;
+
+  cb_data = user_data;
+  self = cb_data->self;
 
   if (g_strcmp0 (response, "cancel") == 0)
     {
@@ -241,20 +223,18 @@ on_prompt_to_save_response_file_open (AdwMessageDialog *dialog,
     }
   else if (g_strcmp0 (response, "save") == 0)
     {
-      if (cb_data->self->current_filename == NULL)
+      if (self->current_filename == NULL)
         {
-          show_save_file_dialog (cb_data->self,
-                                 prompt_to_save_on_file_dialog_save_finish,
-                                 cb_data);
+          show_save_file_dialog (self, on_file_dialog_save_finish_save_and_open_file, cb_data);
           return;
         }
       else
         {
-          save_canvas (cb_data->self);
+          save_to_current_file (self);
         }
     }
 
-  load_file (cb_data->self, cb_data->user_data);
+  open_file (self, cb_data->user_data);
   g_free (cb_data);
 }
 
@@ -271,7 +251,7 @@ on_file_dialog_open_finish (GObject      *source_object,
 
   self = data;
   error = NULL;
-  file = gtk_file_dialog_open_finish(GTK_FILE_DIALOG(source_object), res, &error);
+  file = gtk_file_dialog_open_finish (GTK_FILE_DIALOG(source_object), res, &error);
 
   if (error != NULL)
     {
@@ -281,19 +261,19 @@ on_file_dialog_open_finish (GObject      *source_object,
 
   filename = g_file_get_path (file);
 
-  if (!self->is_current_file_saved)
+  if (self->is_current_file_saved)
+    {
+      open_file (self, filename);
+    }
+  else
     {
       cb_data = g_malloc (sizeof (CanvasRegionUserData));
       cb_data->self = self;
       cb_data->user_data = filename;
 
       canvas_region_prompt_to_save_current_file (self,
-                                                G_CALLBACK (on_prompt_to_save_response_file_open),
-                                                cb_data);
-    }
-  else
-    {
-      load_file (self, filename);
+                                                 G_CALLBACK (on_open_file_prompt_response),
+                                                 cb_data);
     }
 }
 
@@ -321,11 +301,11 @@ on_file_dialog_save_finish (GObject      *source_object,
 }
 
 static void
-draw_function (GtkDrawingArea *area,
-               cairo_t        *cr,
-               int             width,
-               int             height,
-               gpointer        user_data)
+drawing_area_draw_function (GtkDrawingArea *area,
+                            cairo_t        *cr,
+                            int             width,
+                            int             height,
+                            gpointer        user_data)
 {
   CanvasRegion *self = user_data;
 
@@ -333,53 +313,35 @@ draw_function (GtkDrawingArea *area,
     cairo_set_source_surface (cr, self->cairo_surface, 0, 0);
   else
     cairo_set_source_surface (cr, self->cairo_surface_save, 0, 0);
+
   cairo_paint (cr);
 }
 
 static void
-make_surface_white (cairo_surface_t *cairo_surface)
-{
-  cairo_t *cr = cairo_create (cairo_surface);
-
-  cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
-  cairo_paint (cr);
-  cairo_destroy (cr);
-}
-
-static void
-on_mouse_press (GtkGestureClick *gesture,
-                gint             n_press,
-                gdouble          x,
-                gdouble          y,
-                gpointer         user_data)
+drawing_area_on_mouse_press (GtkGestureClick *gesture,
+                             gint             n_press,
+                             gdouble          x,
+                             gdouble          y,
+                             gpointer         user_data)
 {
   CanvasRegion *self;
   cairo_t *cr;
-  GdkRGBA white_color;
-
-  white_color.red = 1.0;
-  white_color.green = 1.0;
-  white_color.blue = 1.0;
-  white_color.alpha = 1.0;
 
   self = user_data;
 
   if (self->draw_start_click_cb == NULL)
-    {
-      return;
-    }
+    return;
 
   cr = cairo_create (self->cairo_surface_save);
 
-  self->draw_event.current_x = x;
-  self->draw_event.current_y = y;
-
   if (self->is_erasing)
-    gdk_cairo_set_source_rgba (cr, &white_color);
+    gdk_cairo_set_source_rgba (cr, &WHITE_COLOR);
   else
     gdk_cairo_set_source_rgba (cr, toolbar_get_current_color(self->toolbar));
 
   update_draw_event_from_toolbar (self);
+  self->draw_event.current_x = x;
+  self->draw_event.current_y = y;
 
   self->draw_start_click_cb (self, cr, &self->draw_event);
 
@@ -399,11 +361,18 @@ on_gesture_drag_begin (GtkGestureDrag *gesture,
 {
   CanvasRegion *self = user_data;
 
+  // Initializing draw event
   self->draw_event.start_x = start_x;
   self->draw_event.start_y = start_y;
 
-  self->draw_event.last_x = -1;
-  self->draw_event.last_y = -1;
+  self->draw_event.offset_x = 0;
+  self->draw_event.offset_y = 0;
+
+  self->draw_event.last_x = start_x;
+  self->draw_event.last_y = start_y;
+
+  self->draw_event.current_x = start_x;
+  self->draw_event.current_y = start_y;
 }
 
 static void
@@ -414,7 +383,6 @@ on_gesture_drag_update (GtkGestureDrag *gesture,
 {
   CanvasRegion *self;
   cairo_t *cr;
-  GdkRGBA white_color;
 
   self = user_data;
 
@@ -426,27 +394,21 @@ on_gesture_drag_update (GtkGestureDrag *gesture,
     {
       if (self->cairo_surface)
         cairo_surface_destroy (self->cairo_surface);
-      self->cairo_surface = copy_surface (self->cairo_surface_save);
+      self->cairo_surface = copy_cairo_surface (self->cairo_surface_save);
       cr = cairo_create (self->cairo_surface);
     }
 
+  if (self->is_erasing)
+    gdk_cairo_set_source_rgba (cr, &WHITE_COLOR);
+  else
+    gdk_cairo_set_source_rgba (cr, toolbar_get_current_color(self->toolbar));
+
+  update_draw_event_from_toolbar (self);
   self->draw_event.offset_x = offset_x;
   self->draw_event.offset_y = offset_y;
 
   self->draw_event.current_x = self->draw_event.start_x + offset_x;
   self->draw_event.current_y = self->draw_event.start_y + offset_y;
-
-  white_color.red = 1.0;
-  white_color.green = 1.0;
-  white_color.blue = 1.0;
-  white_color.alpha = 1.0;
-
-  if (self->is_erasing)
-    gdk_cairo_set_source_rgba (cr, &white_color);
-  else
-    gdk_cairo_set_source_rgba (cr, toolbar_get_current_color(self->toolbar));
-
-  update_draw_event_from_toolbar (self);
 
   self->draw_cb (self, cr, &self->draw_event);
 
@@ -454,7 +416,6 @@ on_gesture_drag_update (GtkGestureDrag *gesture,
   self->draw_event.last_y = self->draw_event.current_y;
 
   cairo_destroy (cr);
-
   gtk_widget_queue_draw (GTK_WIDGET(self->drawing_area));
 }
 
@@ -470,32 +431,27 @@ on_gesture_drag_end (GtkGestureDrag *gesture,
 }
 
 static void
-on_corner_drag_update (GtkGestureDrag *gesture,
-                       gdouble        offset_x,
-                       gdouble        offset_y,
-                       gpointer       user_data)
+on_resize_corner_drag_update (GtkGestureDrag *gesture,
+                              gdouble        offset_x,
+                              gdouble        offset_y,
+                              gpointer       user_data)
 {
   CanvasRegion *self;
   cairo_format_t format;
   cairo_t *cr;
-  gdouble width;
-  gdouble height;
 
   self = user_data;
   format = cairo_image_surface_get_format (self->cairo_surface_save);
-  width = self->width + offset_x;
-  height = self->height + offset_y;
+  self->width = MAX (self->width + offset_x, 1);
+  self->height = MAX (self->height + offset_y, 1);
 
   if (self->cairo_surface)
     cairo_surface_destroy (self->cairo_surface);
 
-  self->width = width;
-  self->height = height;
-
   gtk_drawing_area_set_content_width (self->drawing_area, self->width);
   gtk_drawing_area_set_content_height (self->drawing_area, self->height);
 
-  self->cairo_surface = cairo_image_surface_create (format, width, height);
+  self->cairo_surface = cairo_image_surface_create (format, self->width, self->height);
 
   cr = cairo_create (self->cairo_surface);
 
@@ -511,10 +467,10 @@ on_corner_drag_update (GtkGestureDrag *gesture,
 }
 
 static void
-on_corner_drag_end (GtkGestureDrag *gesture,
-                     gdouble         offset_x,
-                     gdouble         offset_y,
-                     gpointer        user_data)
+on_resize_corner_drag_end (GtkGestureDrag *gesture,
+                           gdouble         offset_x,
+                           gdouble         offset_y,
+                           gpointer        user_data)
 {
   CanvasRegion *self = user_data;
   save_and_destroy_current_surface (self);
@@ -554,11 +510,13 @@ on_text_popover_text_change (GtkTextBuffer *text_buffer,
   if (self->cairo_surface)
     cairo_surface_destroy (self->cairo_surface);
 
-  self->cairo_surface = copy_surface (self->cairo_surface_save);
+  self->cairo_surface = copy_cairo_surface (self->cairo_surface_save);
 
   cr = cairo_create (self->cairo_surface);
   gdk_cairo_set_source_rgba (cr, toolbar_get_current_color(self->toolbar));
+
   self->draw_cb (self, cr, &self->draw_event);
+
   cairo_destroy (cr);
 
   gtk_widget_queue_draw (GTK_WIDGET (self->drawing_area));
@@ -641,19 +599,21 @@ show_save_file_dialog (CanvasRegion         *self,
 }
 
 void
-canvas_region_save_file (CanvasRegion           *self,
-                         on_file_save_finish     on_save_finish)
+canvas_region_save_current_file (CanvasRegion           *self,
+                                 on_file_save_finish     on_save_finish)
 {
+  CanvasRegionUserData *cb_data;
+
   if (self->current_filename != NULL)
     {
-      save_canvas (self);
+      save_to_current_file (self);
 
       if (on_save_finish != NULL)
         on_save_finish (self);
     }
   else
     {
-      CanvasRegionUserData *cb_data = g_malloc (sizeof (CanvasRegionUserData));
+      cb_data = g_malloc (sizeof (CanvasRegionUserData));
       cb_data->self = self;
       cb_data->user_data = on_save_finish;
       show_save_file_dialog (self, on_file_dialog_save_finish, cb_data);
@@ -740,21 +700,21 @@ canvas_region_init (CanvasRegion *self)
   self->width = gtk_drawing_area_get_content_width (self->drawing_area);
   self->height = gtk_drawing_area_get_content_height (self->drawing_area);
 
-  self->cairo_surface_save = cairo_image_surface_create (CAIRO_FORMAT_RGB24,
-                                                    self->width,
-                                                    self->height);
-
-  gtk_widget_set_cursor_from_name (GTK_WIDGET (self->canvas_region_corner), "nwse-resize");
-
-  set_is_current_file_saved (self, true);
-
   self->draw_start_click_cb = &on_brush_draw_start_click;
   self->draw_cb = &on_brush_draw;
   self->save_while_drawing = true;
+  self->is_erasing = false;
 
-  make_surface_white (self->cairo_surface_save);
+  self->cairo_surface_save = cairo_image_surface_create (CAIRO_FORMAT_RGB24,
+                                                         self->width, self->height);
 
-  gtk_drawing_area_set_draw_func (self->drawing_area, draw_function, self, NULL);
+  gtk_widget_set_cursor_from_name (GTK_WIDGET (self->resize_corner), "nwse-resize");
+
+  set_is_current_file_saved (self, true);
+
+  make_cairo_surface_white (self->cairo_surface_save);
+
+  gtk_drawing_area_set_draw_func (self->drawing_area, drawing_area_draw_function, self, NULL);
 }
 
 static void
@@ -776,25 +736,25 @@ canvas_region_class_init (CanvasRegionClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/org/gnome/paint/ui/canvas-region.ui");
 
+  /* Widgets */
   gtk_widget_class_bind_template_child (widget_class, CanvasRegion, drawing_area);
   gtk_widget_class_bind_template_child (widget_class, CanvasRegion, text_popover);
   gtk_widget_class_bind_template_child (widget_class, CanvasRegion, text_popover_text_view);
-  gtk_widget_class_bind_template_child (widget_class, CanvasRegion, canvas_region_corner);
+  gtk_widget_class_bind_template_child (widget_class, CanvasRegion, resize_corner);
 
   /* Callbacks */
-  gtk_widget_class_bind_template_callback (widget_class, on_mouse_press);
+  gtk_widget_class_bind_template_callback (widget_class, drawing_area_on_mouse_press);
   gtk_widget_class_bind_template_callback (widget_class, on_gesture_drag_begin);
   gtk_widget_class_bind_template_callback (widget_class, on_gesture_drag_update);
   gtk_widget_class_bind_template_callback (widget_class, on_gesture_drag_end);
-  gtk_widget_class_bind_template_callback (widget_class, on_corner_drag_update);
-  gtk_widget_class_bind_template_callback (widget_class, on_corner_drag_end);
+  gtk_widget_class_bind_template_callback (widget_class, on_resize_corner_drag_update);
+  gtk_widget_class_bind_template_callback (widget_class, on_resize_corner_drag_end);
   gtk_widget_class_bind_template_callback (widget_class, on_text_popover_close);
   gtk_widget_class_bind_template_callback (widget_class, on_text_popover_submit);
   gtk_widget_class_bind_template_callback (widget_class, on_text_popover_text_change);
 
-  G_OBJECT_CLASS (klass)->dispose = canvas_region_dispose;
-
-  canvas_region_signals[FILE_SAVE_STATUS_CHANGE] = g_signal_new ("on-file-save-status-change",
+  /* Signals */
+  canvas_region_signals[SAVE_STATUS_CHANGE] = g_signal_new ("on-file-save-status-change",
                                                                  G_TYPE_FROM_CLASS (klass),
                                                                  G_SIGNAL_RUN_LAST,
                                                                  0,
@@ -804,4 +764,7 @@ canvas_region_class_init (CanvasRegionClass *klass)
                                                                  G_TYPE_NONE,
                                                                  1,
                                                                  G_TYPE_BOOLEAN);
+
+  /* Dispose */
+  G_OBJECT_CLASS (klass)->dispose = canvas_region_dispose;
 }

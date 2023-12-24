@@ -1,6 +1,6 @@
 /* text.c
  *
- * Copyright 2023 Ramikw
+ * Copyright 2023 Rami Alkawadri
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,10 +28,11 @@ void on_text_draw_start_click (CanvasRegion *self,
 {
   GtkPopover *text_popover = canvas_region_get_text_popover (self);
   GdkRectangle rect;
+
   rect.x = draw_event->current_x;
   rect.y = draw_event->current_y;
-  rect.width = 1;
-  rect.height = 1;
+  rect.width = 0;
+  rect.height = 0;
 
   gtk_popover_set_pointing_to (text_popover, &rect);
   gtk_popover_popup (text_popover);

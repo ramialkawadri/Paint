@@ -1,6 +1,6 @@
 /* brush.c
  *
- * Copyright 2023 Ramikw
+ * Copyright 2023 Rami Alkawadri
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,9 @@ on_brush_draw_start_click (CanvasRegion *self,
   cairo_fill (cr);
 }
 
+/**
+ * Returns the next point with distance d from the point (x0, y0) on the line y = mx + b.
+ */
 static gdouble
 get_next_point_on_line_with_distance_d (gdouble m,
                                         gdouble b,
@@ -41,8 +44,9 @@ get_next_point_on_line_with_distance_d (gdouble m,
 {
   return (sqrt (m * m + 1) * d + (m * m + 1) * x0) / (m * m + 1);
 }
+
 /**
- * Draw a line from last drawn point, it moves along the x axis
+ * Draws a line of circle from last drawn point. It moves along the x axis.
  */
 static void
 draw_along_x_axis (cairo_t   *cr,
@@ -91,7 +95,7 @@ draw_along_x_axis (cairo_t   *cr,
 }
 
 /**
- * Draw a line from last drawn point, it moves along the y axis
+ * Draws a line of circle from last drawn point. It moves along the y axis.
  */
 static void
 draw_along_y_axis (cairo_t   *cr,
@@ -146,9 +150,6 @@ on_brush_draw (CanvasRegion *self,
 {
   gdouble delta_x;
   gdouble delta_y;
-
-  if (draw_event->last_x == -1 || draw_event->last_y == -1)
-    return;
 
   delta_x = ABS (draw_event->current_x - draw_event->last_x);
   delta_y = ABS (draw_event->current_y - draw_event->last_y);

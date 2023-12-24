@@ -1,6 +1,6 @@
 /* canvas-region.h
  *
- * Copyright 2023 Ramikw
+ * Copyright 2023 Rami Alkawadri
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (CanvasRegion, canvas_region, PAINT, CANVAS_REGION, GtkGrid)
 
+/* Callback types */
 typedef void (*on_draw_start_click) (CanvasRegion *self,
                                      cairo_t      *cr,
                                      DrawEvent    *draw_event);
@@ -40,11 +41,12 @@ typedef void (*on_draw)             (CanvasRegion *self,
 
 typedef void (*on_file_save_finish) (CanvasRegion *self);
 
-void                canvas_region_set_toolbar                 (CanvasRegion       *self,
-                                                              Toolbar             *toolbar);
+/* Methods */
+void                canvas_region_set_toolbar                 (CanvasRegion        *self,
+                                                               Toolbar             *toolbar);
 
 void                canvas_region_open_new_file               (CanvasRegion       *self);
-void                canvas_region_save_file                   (CanvasRegion       *self,
+void                canvas_region_save_current_file           (CanvasRegion       *self,
                                                                on_file_save_finish on_save_finish);
 
 char               *canvas_region_get_current_file_name       (CanvasRegion       *self);

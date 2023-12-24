@@ -1,6 +1,6 @@
 /* circle.c
  *
- * Copyright 2023 Ramikw
+ * Copyright 2023 Rami Alkawadri
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
 #include "circle.h"
 
 void on_circle_draw_start_click (CanvasRegion *self,
-                                cairo_t *cr,
-                                DrawEvent *draw_event)
+                                 cairo_t *cr,
+                                 DrawEvent *draw_event)
 {
 }
 
@@ -51,9 +51,6 @@ void on_circle_draw (CanvasRegion *self,
 
   cairo_restore (cr);
 
-  cairo_set_line_width(cr, draw_event->draw_size);
-  cairo_stroke(cr);
+  cairo_set_line_width (cr, draw_event->draw_size);
+  cairo_stroke (cr);
 }
-
-
-

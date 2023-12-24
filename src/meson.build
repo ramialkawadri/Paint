@@ -7,6 +7,7 @@ paint_sources = [
 ]
 
 subdir('drawing_tools')
+subdir('utils')
 
 paint_deps = [
   dependency('gtk4'),

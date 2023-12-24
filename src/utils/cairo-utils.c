@@ -1,4 +1,4 @@
-/* draw-event.h
+/* cairo-utils.c
  *
  * Copyright 2023 Rami Alkawadri
  *
@@ -18,21 +18,36 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#pragma once
+#include "utils/cairo-utils.h"
 
-typedef struct _DrawEvent
+cairo_surface_t *
+copy_cairo_surface (cairo_surface_t *src)
 {
-  gdouble start_x;
-  gdouble start_y;
+  cairo_surface_t *dst;
+  cairo_format_t format;
+  gdouble width;
+  gdouble height;
+  cairo_t *cr;
 
-  gdouble offset_x;
-  gdouble offset_y;
+  format = cairo_image_surface_get_format (src);
+  width = cairo_image_surface_get_width (src);
+  height = cairo_image_surface_get_height (src);
+  dst = cairo_image_surface_create (format, width, height);
 
-  gdouble last_x;
-  gdouble last_y;
+  cr = cairo_create (dst);
+  cairo_set_source_surface (cr, src, 0.0, 0.0);
+  cairo_paint (cr);
+  cairo_destroy (cr);
 
-  gdouble current_x;
-  gdouble current_y;
+  return dst;
+}
 
-  gdouble draw_size;
-} DrawEvent;
+void
+make_cairo_surface_white (cairo_surface_t *cairo_surface)
+{
+  cairo_t *cr = cairo_create (cairo_surface);
+
+  cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
+  cairo_paint (cr);
+  cairo_destroy (cr);
+}

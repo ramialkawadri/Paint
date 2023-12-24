@@ -1,4 +1,4 @@
-/* draw-event.h
+/* colors.h
  *
  * Copyright 2023 Rami Alkawadri
  *
@@ -18,21 +18,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#pragma once
+#include "adwaita.h"
 
-typedef struct _DrawEvent
-{
-  gdouble start_x;
-  gdouble start_y;
-
-  gdouble offset_x;
-  gdouble offset_y;
-
-  gdouble last_x;
-  gdouble last_y;
-
-  gdouble current_x;
-  gdouble current_y;
-
-  gdouble draw_size;
-} DrawEvent;
+GdkRGBA WHITE_COLOR = { 1, 1, 1, 1 };

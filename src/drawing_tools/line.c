@@ -1,6 +1,6 @@
 /* line.c
  *
- * Copyright 2023 Ramikw
+ * Copyright 2023 Rami Alkawadri
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ void on_line_draw (CanvasRegion *self,
   cairo_move_to (cr, draw_event->start_x, draw_event->start_y);
   cairo_line_to (cr, draw_event->current_x, draw_event->current_y);
 
-  cairo_set_line_width(cr, draw_event->draw_size);
+  cairo_set_line_width (cr, draw_event->draw_size);
   cairo_stroke (cr);
 }
 

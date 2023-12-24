@@ -223,8 +223,6 @@
       </object>
     </child>
 
-
-
     <child>
       <object class="GtkBox">
         <property name="orientation">vertical</property>
@@ -232,7 +230,7 @@
         <property name="hexpand">true</property>
         <property name="halign">end</property>
         <child>
-          <object class="GtkSpinButton" id="spin_button">
+          <object class="GtkSpinButton" id="drawing_size_spin_button">
             <property name="adjustment">
               <object class="GtkAdjustment">
                 <property name="lower">1</property>

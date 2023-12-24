@@ -1,4 +1,4 @@
-/* draw-event.h
+/* cairo-utils.h
  *
  * Copyright 2023 Rami Alkawadri
  *
@@ -18,21 +18,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#pragma once
+#include "adwaita.h"
 
-typedef struct _DrawEvent
-{
-  gdouble start_x;
-  gdouble start_y;
-
-  gdouble offset_x;
-  gdouble offset_y;
-
-  gdouble last_x;
-  gdouble last_y;
-
-  gdouble current_x;
-  gdouble current_y;
-
-  gdouble draw_size;
-} DrawEvent;
+cairo_surface_t *copy_cairo_surface       (cairo_surface_t *src);
+void             make_cairo_surface_white (cairo_surface_t *cairo_surface);

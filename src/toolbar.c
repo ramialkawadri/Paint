@@ -1,6 +1,6 @@
 /* toolbar.c
  *
- * Copyright 2023 Ramikw
+ * Copyright 2023 Rami Alkawadri
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "config.h"
-
 #include "toolbar.h"
 #include "drawing_tools/drawing-tool-type.h"
 
@@ -28,7 +26,7 @@ struct _Toolbar
   /* Widgets */
   GtkBox                parent_type;
   GtkColorDialogButton *color_button;
-  GtkSpinButton        *spin_button;
+  GtkSpinButton        *drawing_size_spin_button;
 
   /* Drawing tools buttons */
   GtkButton            *currently_selected_button;
@@ -50,8 +48,9 @@ enum {
 
 static guint toolbar_signals[NUMBER_OF_SIGNALS];
 
-G_DEFINE_FINAL_TYPE (Toolbar, toolbar, GTK_TYPE_BOX);
+static const char *SELECTED_TOOL_CSS_CLASS = "suggested-action";
 
+G_DEFINE_FINAL_TYPE (Toolbar, toolbar, GTK_TYPE_BOX);
 
 static void
 on_open_button_click (GtkButton *button,
@@ -70,15 +69,18 @@ on_save_button_click (GtkButton *button,
 }
 
 static void
-update_current_selected_tool (Toolbar   *self,
-                              GtkButton *selected_tool)
+update_current_selected_tool (Toolbar          *self,
+                              GtkButton        *selected_tool,
+                              DRAWING_TOOL_TYPE tool_type)
 {
   gtk_widget_remove_css_class (GTK_WIDGET (self->currently_selected_button),
-                               "suggested-action");
+                               SELECTED_TOOL_CSS_CLASS);
 
   self->currently_selected_button = selected_tool;
 
-  gtk_widget_add_css_class (GTK_WIDGET (selected_tool), "suggested-action");
+  gtk_widget_add_css_class (GTK_WIDGET (selected_tool), SELECTED_TOOL_CSS_CLASS);
+
+  g_signal_emit (self, toolbar_signals[TOOL_CHANGE], 0, tool_type);
 }
 
 static void
@@ -86,19 +88,15 @@ on_brush_button_click (GtkButton *button,
                        gpointer   user_data)
 {
   Toolbar *self = user_data;
-
-  update_current_selected_tool (self, self->brush_button);
-  g_signal_emit (self, toolbar_signals[TOOL_CHANGE], 0, BRUSH);
+  update_current_selected_tool (self, self->brush_button, BRUSH);
 }
 
 static void
 on_eraser_button_click (GtkButton *button,
-                       gpointer   user_data)
+                        gpointer   user_data)
 {
   Toolbar *self = user_data;
-
-  update_current_selected_tool (self, self->eraser_button);
-  g_signal_emit (self, toolbar_signals[TOOL_CHANGE], 0, ERASER);
+  update_current_selected_tool (self, self->eraser_button, ERASER);
 }
 
 static void
@@ -106,9 +104,7 @@ on_rectangle_button_click (GtkButton *button,
                            gpointer   user_data)
 {
   Toolbar *self = user_data;
-
-  update_current_selected_tool (self, self->rectangle_button);
-  g_signal_emit (self, toolbar_signals[TOOL_CHANGE], 0, RECTANGLE);
+  update_current_selected_tool (self, self->rectangle_button, RECTANGLE);
 }
 
 static void
@@ -116,9 +112,7 @@ on_circle_button_click (GtkButton *button,
                         gpointer   user_data)
 {
   Toolbar *self = user_data;
-
-  update_current_selected_tool (self, self->circle_button);
-  g_signal_emit (self, toolbar_signals[TOOL_CHANGE], 0, CIRCLE);
+  update_current_selected_tool (self, self->circle_button, CIRCLE);
 }
 
 static void
@@ -126,9 +120,7 @@ on_line_button_click (GtkButton *button,
                       gpointer   user_data)
 {
   Toolbar *self = user_data;
-
-  update_current_selected_tool (self, self->line_button);
-  g_signal_emit (self, toolbar_signals[TOOL_CHANGE], 0, LINE);
+  update_current_selected_tool (self, self->line_button, LINE);
 }
 
 static void
@@ -136,9 +128,7 @@ on_text_button_click (GtkButton *button,
                       gpointer   user_data)
 {
   Toolbar *self = user_data;
-
-  update_current_selected_tool (self, self->text_button);
-  g_signal_emit (self, toolbar_signals[TOOL_CHANGE], 0, TEXT);
+  update_current_selected_tool (self, self->text_button, TEXT);
 }
 
 const GdkRGBA *
@@ -150,7 +140,7 @@ toolbar_get_current_color (Toolbar *self)
 double
 toolbar_get_draw_size (Toolbar *self)
 {
-  return gtk_spin_button_get_value (self->spin_button);
+  return gtk_spin_button_get_value (self->drawing_size_spin_button);
 }
 
 static void
@@ -177,8 +167,9 @@ toolbar_class_init (ToolbarClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/org/gnome/paint/ui/toolbar.ui");
 
+  /* Widgets */
   gtk_widget_class_bind_template_child (widget_class, Toolbar, color_button);
-  gtk_widget_class_bind_template_child (widget_class, Toolbar, spin_button);
+  gtk_widget_class_bind_template_child (widget_class, Toolbar, drawing_size_spin_button);
   gtk_widget_class_bind_template_child (widget_class, Toolbar, brush_button);
   gtk_widget_class_bind_template_child (widget_class, Toolbar, eraser_button);
   gtk_widget_class_bind_template_child (widget_class, Toolbar, rectangle_button);
@@ -186,6 +177,7 @@ toolbar_class_init (ToolbarClass *klass)
   gtk_widget_class_bind_template_child (widget_class, Toolbar, line_button);
   gtk_widget_class_bind_template_child (widget_class, Toolbar, text_button);
 
+  /* Callbacks */
   gtk_widget_class_bind_template_callback (widget_class, on_open_button_click);
   gtk_widget_class_bind_template_callback (widget_class, on_save_button_click);
   gtk_widget_class_bind_template_callback (widget_class, on_brush_button_click);
@@ -194,8 +186,6 @@ toolbar_class_init (ToolbarClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_circle_button_click);
   gtk_widget_class_bind_template_callback (widget_class, on_line_button_click);
   gtk_widget_class_bind_template_callback (widget_class, on_text_button_click);
-
-  G_OBJECT_CLASS (klass)->dispose = toolbar_dispose;
 
   /* Signals */
   toolbar_signals[OPEN_FILE] = g_signal_new ("open-file",
@@ -228,4 +218,7 @@ toolbar_class_init (ToolbarClass *klass)
                                                G_TYPE_NONE,
                                                1,
                                                G_TYPE_INT);
+
+  /* Dispose */
+  G_OBJECT_CLASS (klass)->dispose = toolbar_dispose;
 }

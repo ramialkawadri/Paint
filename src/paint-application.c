@@ -1,6 +1,6 @@
 /* paint-application.c
  *
- * Copyright 2023 Ramikw
+ * Copyright 2023 Rami Alkawadri
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,6 @@
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-
-#include "config.h"
 
 #include "paint-application.h"
 #include "paint-window.h"
@@ -74,7 +72,7 @@ paint_application_about_action (GSimpleAction *action,
                                 GVariant      *parameter,
                                 gpointer       user_data)
 {
-  static const char *developers[] = { "Ramikw", NULL };
+  static const char *developers[] = { "Rami Alkawadri", NULL };
   PaintApplication *self = user_data;
   GtkWindow *window = NULL;
 
@@ -85,10 +83,11 @@ paint_application_about_action (GSimpleAction *action,
   adw_show_about_window (window,
                          "application-name", "Paint",
                          "application-icon", "org.gnome.paint",
-                         "developer-name", "Ramikw",
+                         "developer-name", "Rami Alkawadri",
                          "version", "0.1.0",
                          "developers", developers,
-                         "copyright", "© 2023 Ramikw",
+                         "license-type", GTK_LICENSE_GPL_3_0,
+                         "issue-url", "https://github.com/ramialkawadri/Paint/issues/new",
                          NULL);
 }
 
