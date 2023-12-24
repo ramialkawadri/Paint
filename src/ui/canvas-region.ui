@@ -47,40 +47,20 @@
           object="CanvasRegion" swapped="no" />
 
         <child>
-          <object class="GtkGrid">
+          <object class="GtkBox">
             <property name="orientation">horizontal</property>
-            <property name="row-spacing">4</property>
-            <property name="column-spacing">6</property>
+            <property name="spacing">6</property>
 
             <child>
-              <object class="GtkLabel">
-                <property name="label">Enter text:</property>
-                <property name="halign">start</property>
-
-                <layout>
-                  <property name="column">0</property>
-                  <property name="row">0</property>
-                </layout>
-
-              </object>
-            </child>
-
-            <child>
-              <object class="GtkTextView" id="text_popover_text_view">
+              <object class="GtkEntry" id="text_popover_text_entry">
                 <property name="width_request">200</property>
-                <property name="accepts-tab">false</property>
-                <property name="buffer">
-                  <object class="GtkTextBuffer">
-                    <signal name="changed" handler="on_text_popover_text_change"
-                      object="CanvasRegion" swapped="no" />
-                  </object>
-                </property>
+                <property name="placeholder-text">Enter your text here</property>
 
+                <signal name="changed" handler="on_text_popover_text_change"
+                  object="CanvasRegion" swapped="no" />
 
-                <layout>
-                  <property name="column">0</property>
-                  <property name="row">1</property>
-                </layout>
+                <signal name="activate" handler="on_text_popover_activate"
+                  object="CanvasRegion" swapped="no" />
 
                 <style>
                   <class name="text-view" />
@@ -94,11 +74,6 @@
 
                 <signal name="clicked" handler="on_text_popover_submit"
                   object="CanvasRegion" swapped="no" />
-
-                <layout>
-                  <property name="column">1</property>
-                  <property name="row">1</property>
-                </layout>
 
                 <style>
                   <class name="suggested-action" />

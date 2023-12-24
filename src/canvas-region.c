@@ -42,7 +42,7 @@ struct _CanvasRegion
   GtkDrawingArea     *drawing_area;
   Toolbar            *toolbar;
   GtkPopover         *text_popover;
-  GtkTextView        *text_popover_text_view;
+  GtkEntry           *text_popover_text_entry;
   AdwBin             *resize_corner;
 
   /* Draw */
@@ -478,33 +478,31 @@ on_resize_corner_drag_end (GtkGestureDrag *gesture,
 }
 
 static void
-on_text_popover_close  (GtkPopover *popover,
-                        gpointer    user_data)
+on_text_popover_close (GtkPopover *popover,
+                       gpointer    user_data)
 {
   CanvasRegion *self;
-  GtkTextBuffer *buffer;
+  GtkEntryBuffer *buffer;
 
   self = user_data;
-  buffer = gtk_text_view_get_buffer (self->text_popover_text_view);
+  buffer = gtk_entry_get_buffer (self->text_popover_text_entry);
 
   cairo_surface_destroy (self->cairo_surface);
   self->cairo_surface = NULL;
+  gtk_entry_buffer_set_text (buffer, "", 0);
   gtk_widget_queue_draw (GTK_WIDGET (self->drawing_area));
-  gtk_text_buffer_set_text (buffer, "", 0);
 }
 
 static void
-on_text_popover_text_change (GtkTextBuffer *text_buffer,
-                             gpointer       user_data)
+on_text_popover_text_change (GtkEditable *editable,
+                             gpointer     user_data)
 {
-  cairo_t *cr;
   CanvasRegion *self;
-  char *text;
+  cairo_t *cr;
 
   self = user_data;
-  text = canvas_region_get_text_popover_text (self);
 
-  if (strlen (text) == 0)
+  if (!gtk_widget_get_visible (GTK_WIDGET (self->text_popover)))
     return;
 
   if (self->cairo_surface)
@@ -523,8 +521,16 @@ on_text_popover_text_change (GtkTextBuffer *text_buffer,
 }
 
 static void
-on_text_popover_submit    (GtkButton    *button,
-                           CanvasRegion *self)
+on_text_popover_activate (GtkEntry     *entry,
+                          CanvasRegion *self)
+{
+  save_and_destroy_current_surface (self);
+  gtk_popover_popdown (self->text_popover);
+}
+
+static void
+on_text_popover_submit (GtkButton    *button,
+                        CanvasRegion *self)
 {
   save_and_destroy_current_surface (self);
   gtk_popover_popdown (self->text_popover);
@@ -643,21 +649,21 @@ canvas_region_set_selected_tool (CanvasRegion      *self,
     case RECTANGLE:
       self->save_while_drawing = false;
       self->is_erasing = false;
-      self->draw_start_click_cb = &on_rectangle_draw_start_click;
+      self->draw_start_click_cb = NULL;
       self->draw_cb = &on_rectangle_draw;
       break;
 
     case CIRCLE:
       self->is_erasing = false;
       self->save_while_drawing = false;
-      self->draw_start_click_cb = &on_circle_draw_start_click;
+      self->draw_start_click_cb = NULL;
       self->draw_cb = &on_circle_draw;
       break;
 
     case LINE:
       self->is_erasing = false;
       self->save_while_drawing = false;
-      self->draw_start_click_cb = &on_line_draw_start_click;
+      self->draw_start_click_cb = NULL;
       self->draw_cb = &on_line_draw;
       break;
     
@@ -683,10 +689,10 @@ canvas_region_get_text_popover (CanvasRegion *self)
 char *
 canvas_region_get_text_popover_text (CanvasRegion *self)
 {
-  GtkTextBuffer *buffer = NULL;
+  GtkEntryBuffer *buffer = NULL;
   gchar *text;
 
-  buffer = gtk_text_view_get_buffer (self->text_popover_text_view);
+  buffer = gtk_entry_get_buffer (self->text_popover_text_entry);
   g_object_get (G_OBJECT (buffer), "text", &text, NULL);
 
   return text;
@@ -739,7 +745,7 @@ canvas_region_class_init (CanvasRegionClass *klass)
   /* Widgets */
   gtk_widget_class_bind_template_child (widget_class, CanvasRegion, drawing_area);
   gtk_widget_class_bind_template_child (widget_class, CanvasRegion, text_popover);
-  gtk_widget_class_bind_template_child (widget_class, CanvasRegion, text_popover_text_view);
+  gtk_widget_class_bind_template_child (widget_class, CanvasRegion, text_popover_text_entry);
   gtk_widget_class_bind_template_child (widget_class, CanvasRegion, resize_corner);
 
   /* Callbacks */
@@ -749,9 +755,10 @@ canvas_region_class_init (CanvasRegionClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_gesture_drag_end);
   gtk_widget_class_bind_template_callback (widget_class, on_resize_corner_drag_update);
   gtk_widget_class_bind_template_callback (widget_class, on_resize_corner_drag_end);
+  gtk_widget_class_bind_template_callback (widget_class, on_text_popover_text_change);
   gtk_widget_class_bind_template_callback (widget_class, on_text_popover_close);
   gtk_widget_class_bind_template_callback (widget_class, on_text_popover_submit);
-  gtk_widget_class_bind_template_callback (widget_class, on_text_popover_text_change);
+  gtk_widget_class_bind_template_callback (widget_class, on_text_popover_activate);
 
   /* Signals */
   canvas_region_signals[SAVE_STATUS_CHANGE] = g_signal_new ("on-file-save-status-change",

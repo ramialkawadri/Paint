@@ -22,12 +22,6 @@
 #include "draw-event.h"
 #include "line.h"
 
-void on_line_draw_start_click (CanvasRegion *self,
-                               cairo_t *cr,
-                               DrawEvent *draw_event)
-{
-}
-
 void on_line_draw (CanvasRegion *self,
                    cairo_t *cr,
                    DrawEvent *draw_event)
@@ -38,4 +32,3 @@ void on_line_draw (CanvasRegion *self,
   cairo_set_line_width (cr, draw_event->draw_size);
   cairo_stroke (cr);
 }
-
