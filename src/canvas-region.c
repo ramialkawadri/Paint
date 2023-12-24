@@ -37,15 +37,12 @@ typedef struct _CanvasRegionUserData {
 struct _CanvasRegion
 {
   /* Widgets */
-  GtkBox              parent_type;
+  GtkGrid             parent_type;
   GtkDrawingArea     *drawing_area;
   Toolbar            *toolbar;
   GtkPopover         *text_popover;
   GtkTextView        *text_popover_text_view;
-
-  /* Controllers */
-  GtkGestureDrag     *gesture_drag;
-  GtkGestureClick    *gesture_click;
+  AdwBin             *canvas_region_corner;
 
   /* Draw */
   DrawEvent           draw_event;
@@ -72,7 +69,7 @@ enum {
 
 static guint canvas_region_signals [NUMBER_OF_SIGNALS];
 
-G_DEFINE_FINAL_TYPE (CanvasRegion, canvas_region, GTK_TYPE_BOX);
+G_DEFINE_FINAL_TYPE (CanvasRegion, canvas_region, GTK_TYPE_GRID);
 
 static void
 show_save_file_dialog (CanvasRegion       *self,
@@ -107,6 +104,8 @@ save_and_destroy_current_surface (CanvasRegion *self)
     {
       cairo_surface_destroy (self->cairo_surface_save);
       self->cairo_surface_save = copy_surface (self->cairo_surface);
+      self->width = cairo_image_surface_get_width (self->cairo_surface);
+      self->height = cairo_image_surface_get_height (self->cairo_surface);
       cairo_surface_destroy (self->cairo_surface);
       self->cairo_surface = NULL;
     }
@@ -471,6 +470,58 @@ on_gesture_drag_end (GtkGestureDrag *gesture,
 }
 
 static void
+on_corner_drag_update (GtkGestureDrag *gesture,
+                       gdouble        offset_x,
+                       gdouble        offset_y,
+                       gpointer       user_data)
+{
+  CanvasRegion *self;
+  cairo_format_t format;
+  cairo_t *cr;
+  gdouble width;
+  gdouble height;
+
+  self = user_data;
+  format = cairo_image_surface_get_format (self->cairo_surface_save);
+  width = self->width + offset_x;
+  height = self->height + offset_y;
+
+  if (self->cairo_surface)
+    cairo_surface_destroy (self->cairo_surface);
+
+  self->width = width;
+  self->height = height;
+
+  gtk_drawing_area_set_content_width (self->drawing_area, self->width);
+  gtk_drawing_area_set_content_height (self->drawing_area, self->height);
+
+  self->cairo_surface = cairo_image_surface_create (format, width, height);
+
+  cr = cairo_create (self->cairo_surface);
+
+  cairo_set_source_rgb (cr, 1, 1, 1);
+  cairo_paint (cr);
+
+  cairo_set_source_surface (cr, self->cairo_surface_save, 0.0, 0.0);
+  cairo_paint (cr);
+
+  cairo_destroy (cr);
+
+  gtk_widget_queue_draw (GTK_WIDGET (self->drawing_area));
+}
+
+static void
+on_corner_drag_end (GtkGestureDrag *gesture,
+                     gdouble         offset_x,
+                     gdouble         offset_y,
+                     gpointer        user_data)
+{
+  CanvasRegion *self = user_data;
+  save_and_destroy_current_surface (self);
+  set_is_current_file_saved (self, false);
+}
+
+static void
 on_text_popover_close  (GtkPopover *popover,
                         gpointer    user_data)
 {
@@ -693,6 +744,8 @@ canvas_region_init (CanvasRegion *self)
                                                     self->width,
                                                     self->height);
 
+  gtk_widget_set_cursor_from_name (GTK_WIDGET (self->canvas_region_corner), "nwse-resize");
+
   set_is_current_file_saved (self, true);
 
   self->draw_start_click_cb = &on_brush_draw_start_click;
@@ -724,16 +777,17 @@ canvas_region_class_init (CanvasRegionClass *klass)
                                                "/org/gnome/paint/ui/canvas-region.ui");
 
   gtk_widget_class_bind_template_child (widget_class, CanvasRegion, drawing_area);
-  gtk_widget_class_bind_template_child (widget_class, CanvasRegion, gesture_drag);
-  gtk_widget_class_bind_template_child (widget_class, CanvasRegion, gesture_click);
   gtk_widget_class_bind_template_child (widget_class, CanvasRegion, text_popover);
   gtk_widget_class_bind_template_child (widget_class, CanvasRegion, text_popover_text_view);
+  gtk_widget_class_bind_template_child (widget_class, CanvasRegion, canvas_region_corner);
 
   /* Callbacks */
   gtk_widget_class_bind_template_callback (widget_class, on_mouse_press);
   gtk_widget_class_bind_template_callback (widget_class, on_gesture_drag_begin);
   gtk_widget_class_bind_template_callback (widget_class, on_gesture_drag_update);
   gtk_widget_class_bind_template_callback (widget_class, on_gesture_drag_end);
+  gtk_widget_class_bind_template_callback (widget_class, on_corner_drag_update);
+  gtk_widget_class_bind_template_callback (widget_class, on_corner_drag_end);
   gtk_widget_class_bind_template_callback (widget_class, on_text_popover_close);
   gtk_widget_class_bind_template_callback (widget_class, on_text_popover_submit);
   gtk_widget_class_bind_template_callback (widget_class, on_text_popover_text_change);
@@ -751,4 +805,3 @@ canvas_region_class_init (CanvasRegionClass *klass)
                                                                  1,
                                                                  G_TYPE_BOOLEAN);
 }
-

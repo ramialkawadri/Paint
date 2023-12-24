@@ -29,7 +29,7 @@ G_BEGIN_DECLS
 
 #define PAINT_TYPE_CANVAS_REGION (canvas_region_get_type ())
 
-G_DECLARE_FINAL_TYPE (CanvasRegion, canvas_region, PAINT, CANVAS_REGION, GtkBox)
+G_DECLARE_FINAL_TYPE (CanvasRegion, canvas_region, PAINT, CANVAS_REGION, GtkGrid)
 
 typedef void (*on_draw_start_click) (CanvasRegion *self,
                                      cairo_t      *cr,

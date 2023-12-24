@@ -9,6 +9,15 @@
 
 .canvas-region {
     background-color: rgb(222, 222, 222);
+    padding-right: 36px;
+    padding-bottom: 36px;
+}
+
+.canvas-region-corner {
+  background-color: #ffffff;
+  padding: 4px;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 6px;
+  border: 1px solid rgba(0, 0, 0, 0.7);
 }
 
 .drawing-area {

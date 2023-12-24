@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <template class="CanvasRegion" parent="GtkBox">
+  <template class="CanvasRegion" parent="GtkGrid">
     <property name="orientation">horizontal</property>
     <property name="vexpand">true</property>
     <property name="hexpand">true</property>
@@ -12,14 +12,14 @@
         <property name="valign">start</property>
 
         <child>
-          <object class="GtkGestureClick" id="gesture_click">
+          <object class="GtkGestureClick">
             <signal name="pressed" handler="on_mouse_press" object="CanvasRegion"
               swapped="no" />
           </object>
         </child>
 
         <child>
-          <object class="GtkGestureDrag" id="gesture_drag">
+          <object class="GtkGestureDrag">
             <signal name="drag-begin" handler="on_gesture_drag_begin"
               object="CanvasRegion" swapped="no" />
             <signal name="drag-update" handler="on_gesture_drag_update"
@@ -28,6 +28,11 @@
               swapped="no" />
           </object>
         </child>
+
+        <layout>
+          <property name="column">0</property>
+          <property name="row">0</property>
+        </layout>
 
         <style>
           <class name="drawing-area" />
@@ -104,6 +109,29 @@
           </object>
         </child>
 
+      </object>
+    </child>
+
+    <child>
+      <object class="AdwBin" id="canvas_region_corner">
+
+        <child>
+          <object class="GtkGestureDrag">
+            <signal name="drag-update" handler="on_corner_drag_update"
+              object="CanvasRegion" swapped="no" />
+            <signal name="drag-end" handler="on_corner_drag_end" object="CanvasRegion"
+              swapped="no" />
+          </object>
+        </child>
+
+        <style>
+          <class name="canvas-region-corner" />
+        </style>
+
+        <layout>
+          <property name="column">1</property>
+          <property name="row">1</property>
+        </layout>
       </object>
     </child>
 
