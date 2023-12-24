@@ -32,6 +32,7 @@ struct _PaintWindow
   AdwHeaderBar        *header_bar;
   Toolbar             *toolbar;
   CanvasRegion        *canvas_region;
+  GtkLabel            *size_label;
 
   /* Metadata */
   gboolean             force_close;
@@ -127,12 +128,27 @@ get_window_title (gboolean is_file_saved,
 }
 
 static void
-on_canvas_region_file_save_status_change (CanvasRegion *self,
+on_canvas_region_file_save_status_change (CanvasRegion *canvas_region,
                                           gboolean      is_file_saved,
                                           gpointer      user_data)
 {
-  char *current_file_name = canvas_region_get_current_file_name (self);
+  char *current_file_name = canvas_region_get_current_file_name (canvas_region);
   gtk_window_set_title (user_data, get_window_title (is_file_saved, current_file_name));
+}
+
+static void
+on_canvas_region_resize (CanvasRegion *canvas_region,
+                         gint          width,
+                         gint          height,
+                         gpointer      user_data)
+{
+  PaintWindow *self;
+  char *text;
+
+  self = user_data;
+  text = g_strdup_printf ("%d x %d", width, height);
+
+  gtk_label_set_label (self->size_label, text);
 }
 
 void
@@ -159,6 +175,7 @@ paint_window_class_init (PaintWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, PaintWindow, header_bar);
   gtk_widget_class_bind_template_child (widget_class, PaintWindow, toolbar);
   gtk_widget_class_bind_template_child (widget_class, PaintWindow, canvas_region);
+  gtk_widget_class_bind_template_child (widget_class, PaintWindow, size_label);
 
   /* Callback */
   gtk_widget_class_bind_template_callback (widget_class, on_close_request);
@@ -166,6 +183,7 @@ paint_window_class_init (PaintWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_toolbar_file_save);
   gtk_widget_class_bind_template_callback (widget_class, on_toolbar_tool_change);
   gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_file_save_status_change);
+  gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_resize);
 
   /* Types */
   g_type_ensure (PAINT_TYPE_CANVAS_REGION);

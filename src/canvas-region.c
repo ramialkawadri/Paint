@@ -65,6 +65,7 @@ struct _CanvasRegion
 
 enum {
   SAVE_STATUS_CHANGE,
+  RESIZE,
   NUMBER_OF_SIGNALS
 };
 
@@ -120,19 +121,40 @@ save_to_current_file (CanvasRegion *self)
 }
 
 static void
+update_drawing_area_size (CanvasRegion *self,
+                          gint          width,
+                          gint          height)
+{
+  self->width = width;
+  self->height = height;
+
+  gtk_drawing_area_set_content_width (self->drawing_area, width);
+  gtk_drawing_area_set_content_height (self->drawing_area, height);
+
+  g_signal_emit (self,
+                 canvas_region_signals[RESIZE],
+                 0,
+                 width,
+                 height);
+}
+
+static void
 open_file (CanvasRegion *self,
            char         *filename)
 {
+  gint width;
+  gint height;
+
   cairo_surface_destroy (self->cairo_surface_save);
   self->cairo_surface_save = cairo_image_surface_create_from_png (filename);
 
-  self->width = cairo_image_surface_get_width (self->cairo_surface_save);
-  self->height = cairo_image_surface_get_height (self->cairo_surface_save);
+  width = cairo_image_surface_get_width (self->cairo_surface_save);
+  height = cairo_image_surface_get_height (self->cairo_surface_save);
+  update_drawing_area_size (self, width, height);
+
   self->current_filename = filename;
 
   set_is_current_file_saved (self, true);
-  gtk_drawing_area_set_content_width (self->drawing_area, self->width);
-  gtk_drawing_area_set_content_height (self->drawing_area, self->height);
 
   gtk_widget_queue_draw (GTK_WIDGET(self->drawing_area));
 }
@@ -439,19 +461,20 @@ on_resize_corner_drag_update (GtkGestureDrag *gesture,
   CanvasRegion *self;
   cairo_format_t format;
   cairo_t *cr;
+  gint width;
+  gint height;
 
   self = user_data;
   format = cairo_image_surface_get_format (self->cairo_surface_save);
-  self->width = MAX (self->width + offset_x, 1);
-  self->height = MAX (self->height + offset_y, 1);
+  width = MAX (self->width + offset_x, 1);
+  height = MAX (self->height + offset_y, 1);
 
   if (self->cairo_surface)
     cairo_surface_destroy (self->cairo_surface);
 
-  gtk_drawing_area_set_content_width (self->drawing_area, self->width);
-  gtk_drawing_area_set_content_height (self->drawing_area, self->height);
+  update_drawing_area_size (self, width, height);
 
-  self->cairo_surface = cairo_image_surface_create (format, self->width, self->height);
+  self->cairo_surface = cairo_image_surface_create (format, width, height);
 
   cr = cairo_create (self->cairo_surface);
 
@@ -762,15 +785,27 @@ canvas_region_class_init (CanvasRegionClass *klass)
 
   /* Signals */
   canvas_region_signals[SAVE_STATUS_CHANGE] = g_signal_new ("on-file-save-status-change",
-                                                                 G_TYPE_FROM_CLASS (klass),
-                                                                 G_SIGNAL_RUN_LAST,
-                                                                 0,
-                                                                 NULL,
-                                                                 NULL,
-                                                                 NULL,
-                                                                 G_TYPE_NONE,
-                                                                 1,
-                                                                 G_TYPE_BOOLEAN);
+                                                             G_TYPE_FROM_CLASS (klass),
+                                                             G_SIGNAL_RUN_LAST,
+                                                             0,
+                                                             NULL,
+                                                             NULL,
+                                                             NULL,
+                                                             G_TYPE_NONE,
+                                                             1,
+                                                             G_TYPE_BOOLEAN);
+
+  canvas_region_signals[RESIZE] = g_signal_new ("on-resize",
+                                                G_TYPE_FROM_CLASS (klass),
+                                                G_SIGNAL_RUN_LAST,
+                                                0,
+                                                NULL,
+                                                NULL,
+                                                NULL,
+                                                G_TYPE_NONE,
+                                                2,
+                                                G_TYPE_INT,
+                                                G_TYPE_INT);
 
   /* Dispose */
   G_OBJECT_CLASS (klass)->dispose = canvas_region_dispose;
