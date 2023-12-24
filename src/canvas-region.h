@@ -23,7 +23,7 @@
 #include <adwaita.h>
 #include "draw-event.h"
 #include "toolbar.h"
-#include "drawing-tool.h"
+#include "drawing_tools/drawing-tool-type.h"
 
 G_BEGIN_DECLS
 
@@ -55,7 +55,7 @@ void                canvas_region_prompt_to_save_current_file (CanvasRegion     
                                                                gpointer            user_data);
 
 void                canvas_region_set_selected_tool           (CanvasRegion       *self,
-                                                               DRAWING_TOOL        tool);
+                                                               DRAWING_TOOL_TYPE   tool);
 
 GtkPopover         *canvas_region_get_text_popover            (CanvasRegion       *self);
 char               *canvas_region_get_text_popover_text       (CanvasRegion       *self);

@@ -23,7 +23,8 @@
 #include "paint-window.h"
 #include "toolbar.h"
 #include "canvas-region.h"
-#include "drawing-tool.h"
+
+#include "drawing_tools/drawing-tool-type.h"
 
 struct _PaintWindow
 {
@@ -100,9 +101,9 @@ on_toolbar_file_save (Toolbar *toolbar,
 }
 
 static void
-on_toolbar_tool_change (Toolbar     *toolbar,
-                        DRAWING_TOOL selected_tool,
-                        gpointer     user_data)
+on_toolbar_tool_change (Toolbar          *toolbar,
+                        DRAWING_TOOL_TYPE selected_tool,
+                        gpointer          user_data)
 {
   PaintWindow *self = user_data;
   canvas_region_set_selected_tool (self->canvas_region, selected_tool);

@@ -1,4 +1,4 @@
-/* drawing_tool.h
+/* drawing-tool-type.h
  *
  * Copyright 2023 Ramikw
  *
@@ -27,4 +27,4 @@ typedef enum _DRAWING_TOOL {
   CIRCLE,
   LINE,
   TEXT,
-} DRAWING_TOOL;
+} DRAWING_TOOL_TYPE;

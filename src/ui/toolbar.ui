@@ -255,7 +255,6 @@
 
     <style>
       <class name="toolbar" />
-      <class name="frame" />
     </style>
   </template>
 </interface>

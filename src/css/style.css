@@ -1,6 +1,7 @@
 .toolbar {
     min-height: 3.2em;
     border-width: 2px;
+    border-bottom: 2px solid @borders;
 }
 
 .ColorButtonContainer {

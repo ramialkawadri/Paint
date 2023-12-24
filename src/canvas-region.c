@@ -21,13 +21,13 @@
 #include "config.h"
 
 #include "canvas-region.h"
-#include "brush.h"
-#include "rectangle.h"
-#include "circle.h"
-#include "line.h"
-#include "text.h"
-
 #include "toolbar.h"
+
+#include "drawing_tools/brush.h"
+#include "drawing_tools/rectangle.h"
+#include "drawing_tools/circle.h"
+#include "drawing_tools/line.h"
+#include "drawing_tools/text.h"
 
 typedef struct _CanvasRegionUserData {
   CanvasRegion *self;
@@ -661,8 +661,8 @@ canvas_region_save_file (CanvasRegion           *self,
 }
 
 void
-canvas_region_set_selected_tool (CanvasRegion *self,
-                                 DRAWING_TOOL  tool)
+canvas_region_set_selected_tool (CanvasRegion      *self,
+                                 DRAWING_TOOL_TYPE  tool)
 {
   switch (tool)
     {

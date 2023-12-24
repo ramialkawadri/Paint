@@ -1,15 +1,12 @@
 paint_sources = [
-    'brush.c',
-    'canvas-region.c',
-    'circle.c',
-    'line.c',
-    'main.c',
-    'paint-application.c',
-    'paint-window.c',
-    'rectangle.c',
-    'text.c',
-    'toolbar.c',
+  'canvas-region.c',
+  'main.c',
+  'paint-application.c',
+  'paint-window.c',
+  'toolbar.c',
 ]
+
+subdir('drawing_tools')
 
 paint_deps = [
   dependency('gtk4'),

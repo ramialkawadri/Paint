@@ -21,7 +21,7 @@
 #include "config.h"
 
 #include "toolbar.h"
-#include "drawing-tool.h"
+#include "drawing_tools/drawing-tool-type.h"
 
 struct _Toolbar
 {
