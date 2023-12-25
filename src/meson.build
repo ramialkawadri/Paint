@@ -1,5 +1,6 @@
 paint_sources = [
   'canvas-region.c',
+  'canvas-region-snapshot.c',
   'main.c',
   'paint-application.c',
   'paint-window.c',

@@ -62,5 +62,8 @@ void                canvas_region_set_selected_tool           (CanvasRegion     
 GtkPopover         *canvas_region_get_text_popover            (CanvasRegion       *self);
 char               *canvas_region_get_text_popover_text       (CanvasRegion       *self);
 
+void                canvas_region_undo                        (CanvasRegion       *self);
+void                canvas_region_redo                        (CanvasRegion       *self);
+
 G_END_DECLS
 

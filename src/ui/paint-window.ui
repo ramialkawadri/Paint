@@ -15,6 +15,46 @@
       <object class="AdwToolbarView">
         <child type="top">
           <object class="AdwHeaderBar" id="header_bar">
+
+            <child type="start">
+              <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                
+                <child>
+                  <object class="GtkButton">
+                    <signal name="clicked" handler="on_undo" object="PaintWindow"
+                      swapped="no" />
+
+                    <property name="tooltip-text">Undo</property>
+
+                    <property name="child">
+                      <object class="AdwButtonContent">
+                        <property name="icon-name">edit-undo-symbolic</property>
+                        <property name="use-underline">True</property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkButton">
+                    <signal name="clicked" handler="on_redo" object="PaintWindow"
+                      swapped="no" />
+
+                    <property name="tooltip-text">Redo</property>
+
+                    <property name="child">
+                      <object class="AdwButtonContent">
+                        <property name="icon-name">edit-redo-symbolic</property>
+                        <property name="use-underline">True</property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+
+              </object>
+            </child>
+
             <child type="end">
               <object class="GtkMenuButton">
                 <property name="primary">True</property>

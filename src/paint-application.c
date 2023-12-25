@@ -134,11 +134,43 @@ paint_application_open_action (GSimpleAction *action,
   paint_window_open_new_file (PAINT_WINDOW (window));
 }
 
+static void
+paint_application_undo_action (GSimpleAction *action,
+                               GVariant      *parameter,
+                               gpointer       user_data)
+{
+  PaintApplication *self = user_data;
+  GtkWindow *window = NULL;
+
+  g_assert (PAINT_IS_APPLICATION(self));
+
+  window = gtk_application_get_active_window (GTK_APPLICATION(self));
+
+  paint_window_undo (PAINT_WINDOW (window));
+}
+
+static void
+paint_application_redo_action (GSimpleAction *action,
+                               GVariant      *parameter,
+                               gpointer       user_data)
+{
+  PaintApplication *self = user_data;
+  GtkWindow *window = NULL;
+
+  g_assert (PAINT_IS_APPLICATION(self));
+
+  window = gtk_application_get_active_window (GTK_APPLICATION(self));
+
+  paint_window_redo (PAINT_WINDOW (window));
+}
+
 static const GActionEntry app_actions[] = {
     {"exit", paint_application_exit_action},
     {"about", paint_application_about_action},
     {"save", paint_application_save_action},
     {"open", paint_application_open_action},
+    {"undo", paint_application_undo_action},
+    {"redo", paint_application_redo_action},
 };
 
 static void
@@ -156,6 +188,14 @@ paint_application_init (PaintApplication *self)
   gtk_application_set_accels_for_action (GTK_APPLICATION(self),
                                          "app.open",
                                          (const char *[]){"<primary>o", NULL});
+
+  gtk_application_set_accels_for_action (GTK_APPLICATION(self),
+                                         "app.undo",
+                                         (const char *[]){"<primary>z", NULL});
+
+  gtk_application_set_accels_for_action (GTK_APPLICATION(self),
+                                         "app.redo",
+                                         (const char *[]){"<primary>r", NULL});
 
   gtk_application_set_accels_for_action (GTK_APPLICATION(self),
                                          "app.exit",

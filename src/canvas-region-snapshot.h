@@ -1,4 +1,4 @@
-/* paint-window.h
+/* canvas-region-snapshot.h
  *
  * Copyright 2023 Rami Alkawadri
  *
@@ -18,19 +18,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#pragma once
+#include "adwaita.h"
 
-#include <adwaita.h>
+typedef struct _CanvasRegionSnapshot {
+  gint             width;
+  gint             height;
+  gboolean         is_current_file_saved;
+  cairo_surface_t *surface;
+} CanvasRegionSnapshot;
 
-G_BEGIN_DECLS
+CanvasRegionSnapshot *canvas_region_snapshot_new     (gint                 width,
+                                                      gint                 height,
+                                                      gboolean             is_current_file_saved,
+                                                      cairo_surface_t     *surface);
 
-#define PAINT_TYPE_WINDOW (paint_window_get_type ())
-
-G_DECLARE_FINAL_TYPE (PaintWindow, paint_window, PAINT, WINDOW, AdwApplicationWindow)
-
-void paint_window_save_current_file (PaintWindow *self);
-void paint_window_open_new_file     (PaintWindow *self);
-void paint_window_undo              (PaintWindow *self);
-void paint_window_redo              (PaintWindow *self);
-
-G_END_DECLS
+void                  canvas_region_snapshot_dispose (CanvasRegionSnapshot *self);

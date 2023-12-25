@@ -41,6 +41,22 @@ struct _PaintWindow
 G_DEFINE_FINAL_TYPE (PaintWindow, paint_window, ADW_TYPE_APPLICATION_WINDOW)
 
 static void
+on_undo (GtkButton *button,
+         gpointer   user_data)
+{
+  PaintWindow *self = user_data;
+  canvas_region_undo (self->canvas_region);
+}
+
+static void
+on_redo (GtkButton *button,
+         gpointer   user_data)
+{
+  PaintWindow *self = user_data;
+  canvas_region_redo (self->canvas_region);
+}
+
+static void
 on_file_dialog_save_finish (CanvasRegion *canvas_region)
 {
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (canvas_region));
@@ -163,6 +179,18 @@ paint_window_open_new_file (PaintWindow *self)
   canvas_region_open_new_file (self->canvas_region);
 }
 
+void
+paint_window_undo (PaintWindow *self)
+{
+  canvas_region_undo (self->canvas_region);
+}
+
+void
+paint_window_redo (PaintWindow *self)
+{
+  canvas_region_redo (self->canvas_region);
+}
+
 static void
 paint_window_class_init (PaintWindowClass *klass)
 {
@@ -178,6 +206,8 @@ paint_window_class_init (PaintWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, PaintWindow, size_label);
 
   /* Callback */
+  gtk_widget_class_bind_template_callback (widget_class, on_undo);
+  gtk_widget_class_bind_template_callback (widget_class, on_redo);
   gtk_widget_class_bind_template_callback (widget_class, on_close_request);
   gtk_widget_class_bind_template_callback (widget_class, on_toolbar_file_open);
   gtk_widget_class_bind_template_callback (widget_class, on_toolbar_file_save);
