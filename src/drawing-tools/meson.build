@@ -1,4 +1,4 @@
-current_dir = 'drawing_tools'
+current_dir = 'drawing-tools'
 
 paint_sources += [
   current_dir / 'brush.c',

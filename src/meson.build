@@ -7,7 +7,7 @@ paint_sources = [
   'toolbar.c',
 ]
 
-subdir('drawing_tools')
+subdir('drawing-tools')
 subdir('utils')
 
 paint_deps = [

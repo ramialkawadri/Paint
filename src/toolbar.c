@@ -19,7 +19,7 @@
  */
 
 #include "toolbar.h"
-#include "drawing_tools/drawing-tool-type.h"
+#include "drawing-tools/drawing-tool-type.h"
 
 struct _Toolbar
 {

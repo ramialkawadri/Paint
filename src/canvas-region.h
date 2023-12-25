@@ -23,7 +23,7 @@
 #include <gtk/gtk.h>
 #include "draw-event.h"
 #include "toolbar.h"
-#include "drawing_tools/drawing-tool-type.h"
+#include "drawing-tools/drawing-tool-type.h"
 
 G_BEGIN_DECLS
 
