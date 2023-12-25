@@ -24,10 +24,9 @@
 #include "draw-event.h"
 
 void on_text_draw_start_click (CanvasRegion *self,
-                               cairo_t *cr,
-                               DrawEvent *draw_event);
+                               cairo_t      *cr,
+                               DrawEvent    *draw_event);
 
 void on_text_draw             (CanvasRegion *self,
-                               cairo_t *cr,
-                               DrawEvent *draw_event);
-
+                               cairo_t      *cr,
+                               DrawEvent    *draw_event);

@@ -42,7 +42,7 @@
         <child>
 
           <object class="GtkShortcutsGroup">
-            <property name="title" translatable="yes" context="shortcut window">Drawing</property>
+            <property name="title" translatable="yes" context="shortcut window">Undo and Redo</property>
 
             <child>
               <object class="GtkShortcutsShortcut">

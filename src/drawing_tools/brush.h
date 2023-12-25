@@ -24,10 +24,10 @@
 #include "draw-event.h"
 
 void on_brush_draw_start_click (CanvasRegion *self,
-                                cairo_t *cr,
-                                DrawEvent *draw_event);
+                                cairo_t      *cr,
+                                DrawEvent    *draw_event);
 
 void on_brush_draw             (CanvasRegion *self,
-                                cairo_t *cr,
-                                DrawEvent *draw_event);
+                                cairo_t      *cr,
+                                DrawEvent    *draw_event);
 

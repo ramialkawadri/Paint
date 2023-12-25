@@ -1,13 +1,14 @@
 {
     "files.associations": {
-        "toolbar.h": "c",
-        "paint-window.h": "c",
-        "config.h": "c",
-        "adwaita.h": "c",
-        "adw-application.h": "c",
-        "adw-animation-util.h": "c",
-        "paint-application.h": "c",
-        "canvas-region.h": "c"
+      "toolbar.h": "c",
+      "paint-window.h": "c",
+      "config.h": "c",
+      "adwaita.h": "c",
+      "adw-application.h": "c",
+      "adw-animation-util.h": "c",
+      "paint-application.h": "c",
+      "canvas-region.h": "c",
+      "glib.h": "c"
     },
 
     "editor.formatOnSave": false,

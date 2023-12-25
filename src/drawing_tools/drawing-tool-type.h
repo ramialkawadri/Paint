@@ -27,4 +27,6 @@ typedef enum _DRAWING_TOOL {
   CIRCLE,
   LINE,
   TEXT,
+  FILL,
+  COLOR_PICKER,
 } DRAWING_TOOL_TYPE;

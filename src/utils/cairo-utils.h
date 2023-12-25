@@ -18,7 +18,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "adwaita.h"
+#include <gtk/gtk.h>
 
-cairo_surface_t *copy_cairo_surface       (cairo_surface_t *src);
-void             make_cairo_surface_white (cairo_surface_t *cairo_surface);
+cairo_surface_t *cairo_clone_surface      (cairo_surface_t *src);
+void             cairo_whiten_surface     (cairo_surface_t *cairo_surface);
+
+GdkRGBA         *cairo_get_pixel_color_at (guchar          *pixels,
+                                           cairo_surface_t *cairo_surface,
+                                           gint             x,
+                                           gint             y);

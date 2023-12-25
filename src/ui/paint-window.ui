@@ -106,11 +106,16 @@
               <object class="GtkScrolledWindow">
                 <property name="child">
                   <object class="CanvasRegion" id="canvas_region">
-                    <signal name="on-file-save-status-change"
+
+                    <signal name="file-save-status-change"
                       handler="on_canvas_region_file_save_status_change" object="PaintWindow"
                       swapped="no" />
 
-                    <signal name="on-resize" handler="on_canvas_region_resize"
+                    <signal name="color-picked"
+                      handler="on_canvas_region_color_picked" object="PaintWindow"
+                      swapped="no" />
+
+                    <signal name="resize" handler="on_canvas_region_resize"
                       object="PaintWindow" swapped="no" />
                   </object>
                 </property>

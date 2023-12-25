@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <adwaita.h>
+#include <gtk/gtk.h>
 #include "draw-event.h"
 #include "toolbar.h"
 #include "drawing_tools/drawing-tool-type.h"
@@ -64,6 +64,10 @@ char               *canvas_region_get_text_popover_text       (CanvasRegion     
 
 void                canvas_region_undo                        (CanvasRegion       *self);
 void                canvas_region_redo                        (CanvasRegion       *self);
+
+cairo_surface_t    *canvas_region_get_image_surface           (CanvasRegion       *self);
+void                canvas_region_emit_color_picked_signal    (CanvasRegion       *self,
+                                                               GdkRGBA            *color);
 
 G_END_DECLS
 

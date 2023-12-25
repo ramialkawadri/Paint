@@ -21,7 +21,7 @@
 #include "utils/cairo-utils.h"
 
 cairo_surface_t *
-copy_cairo_surface (cairo_surface_t *src)
+cairo_clone_surface (cairo_surface_t *src)
 {
   cairo_surface_t *dst;
   cairo_format_t format;
@@ -43,11 +43,36 @@ copy_cairo_surface (cairo_surface_t *src)
 }
 
 void
-make_cairo_surface_white (cairo_surface_t *cairo_surface)
+cairo_whiten_surface (cairo_surface_t *cairo_surface)
 {
   cairo_t *cr = cairo_create (cairo_surface);
-
   cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
   cairo_paint (cr);
   cairo_destroy (cr);
+}
+
+GdkRGBA *
+cairo_get_pixel_color_at (guchar          *pixels,
+                          cairo_surface_t *cairo_surface,
+                          gint             x,
+                          gint             y)
+{
+  GdkRGBA *color;
+  guchar *current_pixel;
+  cairo_format_t format;
+  gint width;
+
+  format = cairo_image_surface_get_format (cairo_surface);
+  width = cairo_image_surface_get_width (cairo_surface);
+
+  current_pixel = pixels + y * cairo_format_stride_for_width (format, width) + x * 4;
+
+  color = g_malloc (sizeof (GdkRGBA));
+
+  color->red = current_pixel[2] / 255.0;
+  color->green = current_pixel[1] / 255.0;
+  color->blue = current_pixel[0] / 255.0;
+  color->alpha = 1.0;
+
+  return color;
 }

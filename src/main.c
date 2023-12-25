@@ -36,7 +36,7 @@ main (int argc,
   textdomain (GETTEXT_PACKAGE);
 
   app = paint_application_new ("org.gnome.paint", G_APPLICATION_DEFAULT_FLAGS);
-  ret = g_application_run (G_APPLICATION(app), argc, argv);
+  ret = g_application_run (G_APPLICATION (app), argc, argv);
 
   return ret;
 }

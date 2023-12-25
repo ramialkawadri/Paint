@@ -45,9 +45,9 @@ paint_application_activate (GApplication *app)
 {
   GtkWindow *window;
 
-  g_assert (PAINT_IS_APPLICATION(app));
+  g_assert (PAINT_IS_APPLICATION (app));
 
-  window = gtk_application_get_active_window (GTK_APPLICATION(app));
+  window = gtk_application_get_active_window (GTK_APPLICATION (app));
 
   if (window == NULL)
     { 
@@ -76,9 +76,9 @@ paint_application_about_action (GSimpleAction *action,
   PaintApplication *self = user_data;
   GtkWindow *window = NULL;
 
-  g_assert (PAINT_IS_APPLICATION(self));
+  g_assert (PAINT_IS_APPLICATION (self));
 
-  window = gtk_application_get_active_window (GTK_APPLICATION(self));
+  window = gtk_application_get_active_window (GTK_APPLICATION (self));
 
   adw_show_about_window (window,
                          "application-name", "Paint",
@@ -99,8 +99,8 @@ paint_application_exit_action (GSimpleAction *action,
   PaintApplication *self = user_data;
   GtkWindow *window = NULL;
 
-  g_assert (PAINT_IS_APPLICATION(self));
-  window = gtk_application_get_active_window (GTK_APPLICATION(self));
+  g_assert (PAINT_IS_APPLICATION (self));
+  window = gtk_application_get_active_window (GTK_APPLICATION (self));
   gtk_window_close (window);
 
 }
@@ -113,9 +113,9 @@ paint_application_save_action (GSimpleAction *action,
   PaintApplication *self = user_data;
   GtkWindow *window = NULL;
 
-  g_assert (PAINT_IS_APPLICATION(self));
+  g_assert (PAINT_IS_APPLICATION (self));
 
-  window = gtk_application_get_active_window (GTK_APPLICATION(self));
+  window = gtk_application_get_active_window (GTK_APPLICATION (self));
   paint_window_save_current_file (PAINT_WINDOW (window));
 }
 
@@ -127,9 +127,9 @@ paint_application_open_action (GSimpleAction *action,
   PaintApplication *self = user_data;
   GtkWindow *window = NULL;
 
-  g_assert (PAINT_IS_APPLICATION(self));
+  g_assert (PAINT_IS_APPLICATION (self));
 
-  window = gtk_application_get_active_window (GTK_APPLICATION(self));
+  window = gtk_application_get_active_window (GTK_APPLICATION (self));
 
   paint_window_open_new_file (PAINT_WINDOW (window));
 }
@@ -142,9 +142,9 @@ paint_application_undo_action (GSimpleAction *action,
   PaintApplication *self = user_data;
   GtkWindow *window = NULL;
 
-  g_assert (PAINT_IS_APPLICATION(self));
+  g_assert (PAINT_IS_APPLICATION (self));
 
-  window = gtk_application_get_active_window (GTK_APPLICATION(self));
+  window = gtk_application_get_active_window (GTK_APPLICATION (self));
 
   paint_window_undo (PAINT_WINDOW (window));
 }
@@ -157,9 +157,9 @@ paint_application_redo_action (GSimpleAction *action,
   PaintApplication *self = user_data;
   GtkWindow *window = NULL;
 
-  g_assert (PAINT_IS_APPLICATION(self));
+  g_assert (PAINT_IS_APPLICATION (self));
 
-  window = gtk_application_get_active_window (GTK_APPLICATION(self));
+  window = gtk_application_get_active_window (GTK_APPLICATION (self));
 
   paint_window_redo (PAINT_WINDOW (window));
 }
@@ -176,28 +176,28 @@ static const GActionEntry app_actions[] = {
 static void
 paint_application_init (PaintApplication *self)
 {
-  g_action_map_add_action_entries (G_ACTION_MAP(self),
+  g_action_map_add_action_entries (G_ACTION_MAP (self),
                                    app_actions,
                                    G_N_ELEMENTS (app_actions),
                                    self);
 
-  gtk_application_set_accels_for_action (GTK_APPLICATION(self),
+  gtk_application_set_accels_for_action (GTK_APPLICATION (self),
                                          "app.save",
                                          (const char *[]){"<primary>s", NULL});
 
-  gtk_application_set_accels_for_action (GTK_APPLICATION(self),
+  gtk_application_set_accels_for_action (GTK_APPLICATION (self),
                                          "app.open",
                                          (const char *[]){"<primary>o", NULL});
 
-  gtk_application_set_accels_for_action (GTK_APPLICATION(self),
+  gtk_application_set_accels_for_action (GTK_APPLICATION (self),
                                          "app.undo",
                                          (const char *[]){"<primary>z", NULL});
 
-  gtk_application_set_accels_for_action (GTK_APPLICATION(self),
+  gtk_application_set_accels_for_action (GTK_APPLICATION (self),
                                          "app.redo",
                                          (const char *[]){"<primary>r", NULL});
 
-  gtk_application_set_accels_for_action (GTK_APPLICATION(self),
+  gtk_application_set_accels_for_action (GTK_APPLICATION (self),
                                          "app.exit",
                                          (const char *[]){"<primary>w", NULL});
 }

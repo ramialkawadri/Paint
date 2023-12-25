@@ -37,6 +37,8 @@ struct _Toolbar
   GtkButton            *circle_button;
   GtkButton            *line_button;
   GtkButton            *text_button;
+  GtkButton            *fill_button;
+  GtkButton            *color_picker_button;
 };
 
 enum {
@@ -131,6 +133,22 @@ on_text_button_click (GtkButton *button,
   update_current_selected_tool (self, self->text_button, TEXT);
 }
 
+static void
+on_fill_button_click (GtkButton *button,
+                      gpointer   user_data)
+{
+  Toolbar *self = user_data;
+  update_current_selected_tool (self, self->fill_button, FILL);
+}
+
+static void
+on_color_picker_button_click (GtkButton *button,
+                              gpointer   user_data)
+{
+  Toolbar *self = user_data;
+  update_current_selected_tool (self, self->color_picker_button, COLOR_PICKER);
+}
+
 const GdkRGBA *
 toolbar_get_current_color (Toolbar *self)
 {
@@ -143,10 +161,17 @@ toolbar_get_draw_size (Toolbar *self)
   return gtk_spin_button_get_value (self->drawing_size_spin_button);
 }
 
+void
+toolbar_set_selected_color (Toolbar *self,
+                            GdkRGBA *color)
+{
+  gtk_color_dialog_button_set_rgba (self->color_button, color);
+}
+
 static void
 toolbar_init (Toolbar *self)
 {
-  gtk_widget_init_template (GTK_WIDGET(self));
+  gtk_widget_init_template (GTK_WIDGET (self));
 
   self->currently_selected_button = self->brush_button;
 }
@@ -154,9 +179,9 @@ toolbar_init (Toolbar *self)
 static void
 toolbar_dispose (GObject *gobject)
 {
-  gtk_widget_dispose_template (GTK_WIDGET(gobject), PAINT_TYPE_TOOLBAR);
+  gtk_widget_dispose_template (GTK_WIDGET (gobject), PAINT_TYPE_TOOLBAR);
 
-  G_OBJECT_CLASS (toolbar_parent_class)->dispose(gobject);
+  G_OBJECT_CLASS (toolbar_parent_class)->dispose (gobject);
 }
 
 static void
@@ -176,6 +201,8 @@ toolbar_class_init (ToolbarClass *klass)
   gtk_widget_class_bind_template_child (widget_class, Toolbar, circle_button);
   gtk_widget_class_bind_template_child (widget_class, Toolbar, line_button);
   gtk_widget_class_bind_template_child (widget_class, Toolbar, text_button);
+  gtk_widget_class_bind_template_child (widget_class, Toolbar, fill_button);
+  gtk_widget_class_bind_template_child (widget_class, Toolbar, color_picker_button);
 
   /* Callbacks */
   gtk_widget_class_bind_template_callback (widget_class, on_open_button_click);
@@ -186,6 +213,8 @@ toolbar_class_init (ToolbarClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_circle_button_click);
   gtk_widget_class_bind_template_callback (widget_class, on_line_button_click);
   gtk_widget_class_bind_template_callback (widget_class, on_text_button_click);
+  gtk_widget_class_bind_template_callback (widget_class, on_fill_button_click);
+  gtk_widget_class_bind_template_callback (widget_class, on_color_picker_button_click);
 
   /* Signals */
   toolbar_signals[OPEN_FILE] = g_signal_new ("open-file",

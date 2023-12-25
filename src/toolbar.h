@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <adwaita.h>
+#include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
@@ -31,5 +31,7 @@ G_DECLARE_FINAL_TYPE (Toolbar, toolbar, PAINT, TOOLBAR, GtkBox)
 const GdkRGBA *toolbar_get_current_color       (Toolbar *self);
 
 double         toolbar_get_draw_size           (Toolbar *self);
+void           toolbar_set_selected_color      (Toolbar *self,
+                                                GdkRGBA *color);
 
 G_END_DECLS

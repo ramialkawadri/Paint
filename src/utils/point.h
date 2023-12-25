@@ -1,4 +1,4 @@
-/* colors.h
+/* point.h
  *
  * Copyright 2023 Rami Alkawadri
  *
@@ -18,6 +18,16 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include <gtk/gtk.h>
+#pragma once
 
-GdkRGBA WHITE_COLOR = { 1.0, 1.0, 1.0, 1.0 };
+#include <glib.h>
+
+typedef struct _Point {
+  gint x;
+  gint y;
+} Point;
+
+Point *point_new     (gint x,
+                      gint y);
+
+void   point_dispose (Point *self);

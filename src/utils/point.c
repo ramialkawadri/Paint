@@ -1,4 +1,4 @@
-/* colors.h
+/* point.c
  *
  * Copyright 2023 Rami Alkawadri
  *
@@ -18,6 +18,20 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include <gtk/gtk.h>
+#include "point.h"
 
-GdkRGBA WHITE_COLOR = { 1.0, 1.0, 1.0, 1.0 };
+Point *
+point_new (gint x,
+           gint y)
+{
+  Point *point = g_malloc (sizeof (Point));
+  point->x = x;
+  point->y = y;
+  return point;
+}
+
+void
+point_dispose (Point *self)
+{
+  g_free (self);
+}

@@ -153,6 +153,15 @@ on_canvas_region_file_save_status_change (CanvasRegion *canvas_region,
 }
 
 static void
+on_canvas_region_color_picked (CanvasRegion *canvas_region,
+                               GdkRGBA      *color,
+                               gpointer      user_data)
+{
+  PaintWindow *self = user_data;
+  toolbar_set_selected_color (self->toolbar, color);
+}
+
+static void
 on_canvas_region_resize (CanvasRegion *canvas_region,
                          gint          width,
                          gint          height,
@@ -213,6 +222,7 @@ paint_window_class_init (PaintWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_toolbar_file_save);
   gtk_widget_class_bind_template_callback (widget_class, on_toolbar_tool_change);
   gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_file_save_status_change);
+  gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_color_picked);
   gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_resize);
 
   /* Types */
@@ -223,6 +233,6 @@ paint_window_class_init (PaintWindowClass *klass)
 static void
 paint_window_init (PaintWindow *self)
 {
-  gtk_widget_init_template (GTK_WIDGET(self));
+  gtk_widget_init_template (GTK_WIDGET (self));
   canvas_region_set_toolbar (self->canvas_region, self->toolbar);
 }

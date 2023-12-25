@@ -1,4 +1,4 @@
-/* colors.h
+/* fill.h
  *
  * Copyright 2023 Rami Alkawadri
  *
@@ -18,6 +18,11 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include <gtk/gtk.h>
+#pragma once
 
-GdkRGBA WHITE_COLOR = { 1.0, 1.0, 1.0, 1.0 };
+#include "canvas-region.h"
+#include "draw-event.h"
+
+void on_fill_draw_start_click (CanvasRegion *self,
+                               cairo_t      *cr,
+                               DrawEvent    *draw_event);

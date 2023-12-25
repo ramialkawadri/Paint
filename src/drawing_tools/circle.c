@@ -18,24 +18,23 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "canvas-region.h"
-#include "draw-event.h"
 #include "circle.h"
 
-void on_circle_draw (CanvasRegion *self,
-                     cairo_t *cr,
-                     DrawEvent *draw_event)
+void
+on_circle_draw (CanvasRegion *self,
+                cairo_t      *cr,
+                DrawEvent    *draw_event)
 {
   gdouble x;
   gdouble y;
   gdouble width;
   gdouble height;
 
-  width = ABS(draw_event->current_x - draw_event->start_x);
-  height = ABS(draw_event->current_y - draw_event->start_y);
+  width = ABS (draw_event->current.x - draw_event->start.x);
+  height = ABS (draw_event->current.y - draw_event->start.y);
 
-  x = (draw_event->start_x + draw_event->current_x) / 2;
-  y = (draw_event->start_y + draw_event->current_y) / 2;
+  x = (draw_event->start.x + draw_event->current.x) / 2;
+  y = (draw_event->start.y + draw_event->current.y) / 2;
 
   cairo_save (cr);
 

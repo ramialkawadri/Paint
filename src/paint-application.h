@@ -21,7 +21,6 @@
 #pragma once
 
 #include <adwaita.h>
-#include "toolbar.h"
 
 G_BEGIN_DECLS
 

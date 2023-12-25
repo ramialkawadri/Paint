@@ -20,19 +20,14 @@
 
 #pragma once
 
+#include <glib.h>
+#include "utils/point.h"
+
 typedef struct _DrawEvent
 {
-  gdouble start_x;
-  gdouble start_y;
-
-  gdouble offset_x;
-  gdouble offset_y;
-
-  gdouble last_x;
-  gdouble last_y;
-
-  gdouble current_x;
-  gdouble current_y;
-
-  gdouble draw_size;
+  Point start;
+  Point offset;
+  Point last;
+  Point current;
+  gint  draw_size;
 } DrawEvent;

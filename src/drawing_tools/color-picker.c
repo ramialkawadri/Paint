@@ -1,4 +1,4 @@
-/* colors.h
+/* color-picker.c
  *
  * Copyright 2023 Rami Alkawadri
  *
@@ -18,6 +18,23 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include <gtk/gtk.h>
+#include "color-picker.h"
+#include "utils/cairo-utils.h"
 
-GdkRGBA WHITE_COLOR = { 1.0, 1.0, 1.0, 1.0 };
+void
+on_color_picker_draw_start_click (CanvasRegion *self,
+                                  cairo_t      *cr,
+                                  DrawEvent    *draw_event)
+{
+  guchar *pixels;
+  cairo_surface_t *cairo_surface;
+  GdkRGBA *color;
+
+  cairo_surface = canvas_region_get_image_surface (self);
+  pixels = cairo_image_surface_get_data (cairo_surface);
+  color = cairo_get_pixel_color_at (pixels,
+                                    cairo_surface,
+                                    draw_event->current.x, draw_event->current.y);
+
+  canvas_region_emit_color_picked_signal (self, color);
+}

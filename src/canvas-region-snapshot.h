@@ -18,7 +18,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "adwaita.h"
+#pragma once
+
+#include <gtk/gtk.h>
 
 typedef struct _CanvasRegionSnapshot {
   gint             width;

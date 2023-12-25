@@ -26,8 +26,8 @@ on_brush_draw_start_click (CanvasRegion *self,
                            DrawEvent    *draw_event)
 {
   cairo_arc (cr,
-             draw_event->current_x,
-             draw_event->current_y,
+             draw_event->current.x,
+             draw_event->current.y,
              draw_event->draw_size / 2,
              0, 2 * G_PI);
   cairo_fill (cr);
@@ -64,24 +64,24 @@ draw_along_x_axis (cairo_t   *cr,
   
   gdouble r;
 
-  delta_x = draw_event->current_x - draw_event->last_x;
-  delta_y = draw_event->current_y - draw_event->last_y;
+  delta_x = draw_event->current.x - draw_event->last.x;
+  delta_y = draw_event->current.y - draw_event->last.y;
 
   m = delta_y / delta_x;
-  b = draw_event->current_y - m * draw_event->current_x;
+  b = draw_event->current.y - m * draw_event->current.x;
 
-  x = draw_event->last_x;
-  y = draw_event->last_y;
-  end_x = draw_event->current_x;
+  x = draw_event->last.x;
+  y = draw_event->last.y;
+  end_x = draw_event->current.x;
    
   r = draw_event->draw_size / 2;
 
-  if (draw_event->last_x > draw_event->current_x)
+  if (draw_event->last.x > draw_event->current.x)
     {
-      x = draw_event->current_x;
-      y = draw_event->current_y;
+      x = draw_event->current.x;
+      y = draw_event->current.y;
 
-      end_x = draw_event->last_x;
+      end_x = draw_event->last.x;
     }
 
   while (x <= end_x)
@@ -113,24 +113,24 @@ draw_along_y_axis (cairo_t   *cr,
 
   gdouble r;
 
-  delta_x = draw_event->current_x - draw_event->last_x;
-  delta_y = draw_event->current_y - draw_event->last_y;
+  delta_x = draw_event->current.x - draw_event->last.x;
+  delta_y = draw_event->current.y - draw_event->last.y;
 
   m = delta_x / delta_y;
-  b = draw_event->current_x - m * draw_event->current_y;
+  b = draw_event->current.x - m * draw_event->current.y;
 
-  x = draw_event->last_x;
-  y = draw_event->last_y;
-  end_y = draw_event->current_y;
+  x = draw_event->last.x;
+  y = draw_event->last.y;
+  end_y = draw_event->current.y;
 
   r = draw_event->draw_size / 2;
 
-  if (draw_event->last_y > draw_event->current_y)
+  if (draw_event->last.y > draw_event->current.y)
     {
-      x = draw_event->current_x;
-      y = draw_event->current_y;
+      x = draw_event->current.x;
+      y = draw_event->current.y;
 
-      end_y = draw_event->last_y;
+      end_y = draw_event->last.y;
     }
 
   while (y <= end_y)
@@ -151,8 +151,8 @@ on_brush_draw (CanvasRegion *self,
   gdouble delta_x;
   gdouble delta_y;
 
-  delta_x = ABS (draw_event->current_x - draw_event->last_x);
-  delta_y = ABS (draw_event->current_y - draw_event->last_y);
+  delta_x = ABS (draw_event->current.x - draw_event->last.x);
+  delta_y = ABS (draw_event->current.y - draw_event->last.y);
 
   if (delta_x < delta_y)
     draw_along_y_axis (cr, draw_event);

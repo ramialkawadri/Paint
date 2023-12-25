@@ -18,19 +18,18 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "canvas-region.h"
-#include "draw-event.h"
 #include "text.h"
 
-void on_text_draw_start_click (CanvasRegion *self,
-                               cairo_t *cr,
-                               DrawEvent *draw_event)
+void
+on_text_draw_start_click (CanvasRegion *self,
+                          cairo_t      *cr,
+                          DrawEvent    *draw_event)
 {
   GtkPopover *text_popover = canvas_region_get_text_popover (self);
   GdkRectangle rect;
 
-  rect.x = draw_event->current_x;
-  rect.y = draw_event->current_y;
+  rect.x = draw_event->current.x;
+  rect.y = draw_event->current.y;
   rect.width = 0;
   rect.height = 0;
 
@@ -38,14 +37,15 @@ void on_text_draw_start_click (CanvasRegion *self,
   gtk_popover_popup (text_popover);
 }
 
-void on_text_draw             (CanvasRegion *self,
-                               cairo_t *cr,
-                               DrawEvent *draw_event)
+void
+on_text_draw (CanvasRegion *self,
+              cairo_t      *cr,
+              DrawEvent    *draw_event)
 {
   gchar *text = canvas_region_get_text_popover_text (self);
 
   cairo_set_font_size (cr, draw_event->draw_size * 1.33);
-  cairo_move_to (cr, draw_event->current_x, draw_event->current_y);
+  cairo_move_to (cr, draw_event->current.x, draw_event->current.y);
   cairo_show_text (cr, text);
 }
 
