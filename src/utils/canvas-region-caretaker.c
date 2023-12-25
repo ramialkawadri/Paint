@@ -20,7 +20,7 @@
 
 #include "utils/canvas-region-caretaker.h"
 
-static const gint MAX_NUMBER_OF_SNAPSHOTS = 11;
+static const gint MAX_NUMBER_OF_SNAPSHOTS = 16;
 
 struct _SnapshotNode;
 typedef struct _SnapshotNode SnapshotNode;

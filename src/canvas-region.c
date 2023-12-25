@@ -61,11 +61,10 @@ struct _CanvasRegion
   on_draw                draw_cb;
 
   /* Metadata */
-  int                    width;
-  int                    height;
-  char                  *current_filename;
+  gint                   width;
+  gint                   height;
+  gchar                 *current_filename;
   gboolean               is_current_file_saved;
-  gboolean               is_erasing;
   gboolean               save_while_drawing;
   CanvasRegionCaretaker *caretaker;
 };
@@ -165,7 +164,7 @@ update_drawing_area_size (CanvasRegion *self,
 
 static void
 open_file (CanvasRegion *self,
-           char         *filename)
+           gchar        *filename)
 {
   gint width;
   gint height;
@@ -228,7 +227,7 @@ save_canvas_from_file_dialog_save_result (CanvasRegion *self,
 {
   g_autoptr (GError) error;
   g_autoptr (GFile) file;
-  char *filepath;
+  gchar *filepath;
 
   error = NULL;
   file = gtk_file_dialog_save_finish (GTK_FILE_DIALOG (source_object), res, &error);
@@ -298,7 +297,7 @@ on_file_dialog_open_finish (GObject      *source_object,
   CanvasRegionUserData *cb_data;
   g_autoptr (GError) error;
   g_autoptr (GFile) file;
-  char *filename;
+  gchar *filename;
 
   self = data;
   error = NULL;
@@ -334,7 +333,7 @@ on_file_dialog_save_finish (GObject      *source_object,
                             gpointer      data)
 {
   CanvasRegionUserData *cb_data;
-  on_file_save_finish finish_cb;
+  on_save_finish finish_cb;
 
   cb_data = data;
 
@@ -354,8 +353,8 @@ on_file_dialog_save_finish (GObject      *source_object,
 static void
 drawing_area_draw_function (GtkDrawingArea *area,
                             cairo_t        *cr,
-                            int             width,
-                            int             height,
+                            gint            width,
+                            gint            height,
                             gpointer        user_data)
 {
   CanvasRegion *self = user_data;
@@ -385,12 +384,13 @@ drawing_area_on_mouse_press (GtkGestureClick *gesture,
 
   cr = cairo_create (self->cairo_surface_save);
 
-  if (self->is_erasing)
+  if (self->current_tool_type == ERASER)
     gdk_cairo_set_source_rgba (cr, &WHITE_COLOR);
   else
     gdk_cairo_set_source_rgba (cr, toolbar_get_current_color (self->toolbar));
 
   update_draw_event_from_toolbar (self);
+
   self->draw_event.current.x = x;
   self->draw_event.current.y = y;
 
@@ -452,7 +452,7 @@ on_gesture_drag_update (GtkGestureDrag *gesture,
   self->cairo_surface = cairo_clone_surface (self->cairo_surface_save);
   cr = cairo_create (self->cairo_surface);
 
-  if (self->is_erasing)
+  if (self->current_tool_type == ERASER)
     gdk_cairo_set_source_rgba (cr, &WHITE_COLOR);
   else
     gdk_cairo_set_source_rgba (cr, toolbar_get_current_color (self->toolbar));
@@ -481,6 +481,7 @@ on_gesture_drag_end (GtkGestureDrag *gesture,
 {
   CanvasRegion *self = user_data;
 
+  // Nothing changed
   if (self->current_tool_type == COLOR_PICKER)
     return;
 
@@ -602,7 +603,7 @@ canvas_region_set_toolbar (CanvasRegion *self,
   self->toolbar = toolbar;
 }
 
-char *
+gchar *
 canvas_region_get_current_file_name (CanvasRegion *self)
 {
   return self->current_filename;
@@ -664,8 +665,8 @@ show_save_file_dialog (CanvasRegion         *self,
 }
 
 void
-canvas_region_save_current_file (CanvasRegion           *self,
-                                 on_file_save_finish     on_save_finish)
+canvas_region_save (CanvasRegion           *self,
+                    on_save_finish          save_finish_cb)
 {
   CanvasRegionUserData *cb_data;
 
@@ -673,14 +674,14 @@ canvas_region_save_current_file (CanvasRegion           *self,
     {
       save_to_current_file (self);
 
-      if (on_save_finish != NULL)
-        on_save_finish (self);
+      if (save_finish_cb != NULL)
+        save_finish_cb (self);
     }
   else
     {
       cb_data = g_malloc (sizeof (CanvasRegionUserData));
       cb_data->self = self;
-      cb_data->user_data = on_save_finish;
+      cb_data->user_data = save_finish_cb;
       show_save_file_dialog (self, on_file_dialog_save_finish, cb_data);
     }
 }
@@ -693,15 +694,9 @@ canvas_region_set_selected_tool (CanvasRegion      *self,
 
   switch (tool)
     {
+    // An eraser uses a brush but with white color, this is known by current_tool_type
     case BRUSH:
-      self->save_while_drawing = true;
-      self->is_erasing = false;
-      self->draw_start_click_cb = &on_brush_draw_start_click;
-      self->draw_cb = &on_brush_draw;
-      break;
-
     case ERASER:
-      self->is_erasing = true;
       self->save_while_drawing = true;
       self->draw_start_click_cb = &on_brush_draw_start_click;
       self->draw_cb = &on_brush_draw;
@@ -709,41 +704,35 @@ canvas_region_set_selected_tool (CanvasRegion      *self,
 
     case RECTANGLE:
       self->save_while_drawing = false;
-      self->is_erasing = false;
       self->draw_start_click_cb = NULL;
       self->draw_cb = &on_rectangle_draw;
       break;
 
     case CIRCLE:
-      self->is_erasing = false;
       self->save_while_drawing = false;
       self->draw_start_click_cb = NULL;
       self->draw_cb = &on_circle_draw;
       break;
 
     case LINE:
-      self->is_erasing = false;
       self->save_while_drawing = false;
       self->draw_start_click_cb = NULL;
       self->draw_cb = &on_line_draw;
       break;
     
     case TEXT:
-      self->is_erasing = false;
       self->save_while_drawing = false;
       self->draw_start_click_cb = &on_text_draw_start_click;
       self->draw_cb = &on_text_draw;
       break;
 
     case COLOR_PICKER:
-      self->is_erasing = false;
       self->save_while_drawing = false;
       self->draw_start_click_cb = &on_color_picker_draw_start_click;
       self->draw_cb = NULL;
       break;
 
     case FILL:
-      self->is_erasing = false;
       self->save_while_drawing = false;
       self->draw_start_click_cb = &on_fill_draw_start_click;
       self->draw_cb = NULL;
@@ -755,16 +744,18 @@ canvas_region_set_selected_tool (CanvasRegion      *self,
   }
 }
 
-GtkPopover *
-canvas_region_get_text_popover (CanvasRegion *self)
+void
+canvas_region_show_text_popover (CanvasRegion *self,
+                                 GdkRectangle *pointing_to)
 {
-  return self->text_popover;
+  gtk_popover_set_pointing_to (self->text_popover, pointing_to);
+  gtk_popover_popup (self->text_popover);
 }
 
-char *
+gchar *
 canvas_region_get_text_popover_text (CanvasRegion *self)
 {
-  GtkEntryBuffer *buffer = NULL;
+  GtkEntryBuffer *buffer;
   gchar *text;
 
   buffer = gtk_entry_get_buffer (self->text_popover_text_entry);
@@ -839,20 +830,20 @@ canvas_region_init (CanvasRegion *self)
 
   self->draw_start_click_cb = &on_brush_draw_start_click;
   self->draw_cb = &on_brush_draw;
-  self->save_while_drawing = true;
-  self->is_erasing = false;
   self->current_tool_type = BRUSH;
+
+  self->save_while_drawing = true;
+  self->caretaker = canvas_region_caretaker_new ();
+
 
   self->cairo_surface_save = cairo_image_surface_create (CAIRO_FORMAT_RGB24,
                                                          self->width, self->height);
 
-  self->caretaker = canvas_region_caretaker_new ();
+  cairo_whiten_surface (self->cairo_surface_save);
 
   gtk_widget_set_cursor_from_name (GTK_WIDGET (self->resize_corner), "nwse-resize");
 
   set_is_current_file_saved (self, true);
-
-  cairo_whiten_surface (self->cairo_surface_save);
 
   create_and_save_snapshot (self);
 
@@ -864,9 +855,9 @@ canvas_region_dispose (GObject *gobject)
 {
   CanvasRegion *self = (CanvasRegion *) gobject;
   canvas_region_caretaker_dispose (self->caretaker);
+  cairo_surface_destroy (self->cairo_surface_save);
 
   gtk_widget_dispose_template (GTK_WIDGET (gobject), PAINT_TYPE_CANVAS_REGION);
-
   G_OBJECT_CLASS (canvas_region_parent_class)->dispose (gobject);
 }
 

@@ -30,7 +30,7 @@ G_DECLARE_FINAL_TYPE (Toolbar, toolbar, PAINT, TOOLBAR, GtkBox)
 
 const GdkRGBA *toolbar_get_current_color       (Toolbar *self);
 
-double         toolbar_get_draw_size           (Toolbar *self);
+gdouble        toolbar_get_draw_size           (Toolbar *self);
 void           toolbar_set_selected_color      (Toolbar *self,
                                                 GdkRGBA *color);
 

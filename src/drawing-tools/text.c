@@ -25,16 +25,13 @@ on_text_draw_start_click (CanvasRegion *self,
                           cairo_t      *cr,
                           DrawEvent    *draw_event)
 {
-  GtkPopover *text_popover = canvas_region_get_text_popover (self);
   GdkRectangle rect;
-
   rect.x = draw_event->current.x;
   rect.y = draw_event->current.y;
   rect.width = 0;
   rect.height = 0;
 
-  gtk_popover_set_pointing_to (text_popover, &rect);
-  gtk_popover_popup (text_popover);
+  canvas_region_show_text_popover (self, &rect);
 }
 
 void

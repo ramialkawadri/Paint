@@ -78,7 +78,7 @@ on_open_file_prompt_response (AdwMessageDialog *dialog,
   if (g_strcmp0 (response, "discard") == 0)
     gtk_window_close (user_data);
   else if (g_strcmp0 (response, "save") == 0)
-    canvas_region_save_current_file (self->canvas_region, on_file_dialog_save_finish);
+    canvas_region_save (self->canvas_region, on_file_dialog_save_finish);
 }
 
 static gboolean
@@ -110,7 +110,7 @@ on_toolbar_file_save (Toolbar *toolbar,
                       gpointer user_data)
 {
   PaintWindow *self = user_data;
-  canvas_region_save_current_file (self->canvas_region, NULL);
+  canvas_region_save (self->canvas_region, NULL);
 }
 
 static void
@@ -122,12 +122,12 @@ on_toolbar_tool_change (Toolbar          *toolbar,
   canvas_region_set_selected_tool (self->canvas_region, selected_tool);
 }
 
-static const char *
+static const gchar *
 get_window_title (gboolean is_file_saved,
-                  char    *filename)
+                  gchar   *filename)
 {
   g_autoptr (GFile) file;
-  char *file_basename;
+  gchar *file_basename;
 
   file = NULL;
 
@@ -148,7 +148,7 @@ on_canvas_region_file_save_status_change (CanvasRegion *canvas_region,
                                           gboolean      is_file_saved,
                                           gpointer      user_data)
 {
-  char *current_file_name = canvas_region_get_current_file_name (canvas_region);
+  gchar *current_file_name = canvas_region_get_current_file_name (canvas_region);
   gtk_window_set_title (user_data, get_window_title (is_file_saved, current_file_name));
 }
 
@@ -168,7 +168,7 @@ on_canvas_region_resize (CanvasRegion *canvas_region,
                          gpointer      user_data)
 {
   PaintWindow *self;
-  char *text;
+  gchar *text;
 
   self = user_data;
   text = g_strdup_printf ("%d x %d", width, height);
@@ -179,7 +179,7 @@ on_canvas_region_resize (CanvasRegion *canvas_region,
 void
 paint_window_save_current_file (PaintWindow *self)
 {
-  canvas_region_save_current_file (self->canvas_region, NULL);
+  canvas_region_save (self->canvas_region, NULL);
 }
 
 void

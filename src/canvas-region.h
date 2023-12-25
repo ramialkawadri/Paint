@@ -39,17 +39,17 @@ typedef void (*on_draw)             (CanvasRegion *self,
                                      cairo_t      *cr,
                                      DrawEvent    *draw_event);
 
-typedef void (*on_file_save_finish) (CanvasRegion *self);
+typedef void (*on_save_finish)      (CanvasRegion *self);
 
 /* Methods */
 void                canvas_region_set_toolbar                 (CanvasRegion        *self,
                                                                Toolbar             *toolbar);
 
 void                canvas_region_open_new_file               (CanvasRegion       *self);
-void                canvas_region_save_current_file           (CanvasRegion       *self,
-                                                               on_file_save_finish on_save_finish);
+void                canvas_region_save                        (CanvasRegion       *self,
+                                                               on_save_finish      on_save_finish);
 
-char               *canvas_region_get_current_file_name       (CanvasRegion       *self);
+gchar              *canvas_region_get_current_file_name       (CanvasRegion       *self);
 gboolean            canvas_region_is_current_file_saved       (CanvasRegion       *self);
 
 void                canvas_region_prompt_to_save_current_file (CanvasRegion       *self,
@@ -59,8 +59,9 @@ void                canvas_region_prompt_to_save_current_file (CanvasRegion     
 void                canvas_region_set_selected_tool           (CanvasRegion       *self,
                                                                DRAWING_TOOL_TYPE   tool);
 
-GtkPopover         *canvas_region_get_text_popover            (CanvasRegion       *self);
-char               *canvas_region_get_text_popover_text       (CanvasRegion       *self);
+void                canvas_region_show_text_popover           (CanvasRegion       *self,
+                                                               GdkRectangle       *pointing_to);
+gchar              *canvas_region_get_text_popover_text       (CanvasRegion       *self);
 
 void                canvas_region_undo                        (CanvasRegion       *self);
 void                canvas_region_redo                        (CanvasRegion       *self);

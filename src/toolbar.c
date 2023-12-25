@@ -50,7 +50,7 @@ enum {
 
 static guint toolbar_signals[NUMBER_OF_SIGNALS];
 
-static const char *SELECTED_TOOL_CSS_CLASS = "suggested-action";
+static const gchar *SELECTED_TOOL_CSS_CLASS = "suggested-action";
 
 G_DEFINE_FINAL_TYPE (Toolbar, toolbar, GTK_TYPE_BOX);
 
@@ -155,7 +155,7 @@ toolbar_get_current_color (Toolbar *self)
   return gtk_color_dialog_button_get_rgba (self->color_button);
 }
 
-double
+gdouble
 toolbar_get_draw_size (Toolbar *self)
 {
   return gtk_spin_button_get_value (self->drawing_size_spin_button);

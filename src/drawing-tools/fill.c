@@ -61,9 +61,9 @@ add_valid_surrounding_neighbors (GQueue          *queue,
                                  gint             height,
                                  Point           *current_point)
 {
-  for (int i = -1; i <= 1; i++)
+  for (gint i = -1; i <= 1; i++)
     {
-      for (int j = -1; j <= 1; j++)
+      for (gint j = -1; j <= 1; j++)
         {
           if (i == 0 && j == 0)
             continue;
