@@ -1,4 +1,4 @@
-/* draw-event.h
+/* select.h
  *
  * Copyright 2023 Rami Alkawadri
  *
@@ -20,18 +20,14 @@
 
 #pragma once
 
-#include <glib.h>
-#include "utils/point.h"
+#include "canvas-region.h"
+#include "draw-event.h"
 
-typedef struct _DrawEvent
-{
-  Point    start;
-  Point    offset;
-  Point    last;
-  Point    current;
-  gint     draw_size;
+void on_select_draw_start_click (CanvasRegion *self,
+                                 cairo_t      *cr,
+                                 DrawEvent    *draw_event);
 
-  /* Selection */
-  Point selection_offset;
-  gboolean is_dragging_selection;
-} DrawEvent;
+void on_select_draw             (CanvasRegion *self,
+                                 cairo_t      *cr,
+                                 DrawEvent    *draw_event);
+

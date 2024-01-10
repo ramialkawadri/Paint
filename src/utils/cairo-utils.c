@@ -76,3 +76,46 @@ cairo_get_pixel_color_at (guchar          *pixels,
 
   return color;
 }
+
+
+/* The moving work by making a new surface that copies the rectangle
+ * and then repaint in the new position */
+void
+cairo_move_rectangle (cairo_surface_t *src_surface,
+                      cairo_t         *cr,
+                      GdkRectangle    *from,
+                      GdkRectangle    *to)
+{
+  cairo_surface_t *copy_surface;
+  cairo_t *copy_cr;
+  gint copy_area_width;
+  gint copy_area_height;
+
+  // To not copy anything outside the surface
+  copy_area_width = from->width + from->x > cairo_image_surface_get_width (src_surface) ?
+      cairo_image_surface_get_width (src_surface) - from->x : from->width;
+
+  copy_area_height = from->height + from->y > cairo_image_surface_get_height (src_surface) ?
+      cairo_image_surface_get_height (src_surface) - from->y : from->height;
+  
+  copy_surface = cairo_image_surface_create (cairo_image_surface_get_format (src_surface),
+                                             copy_area_width, copy_area_height);
+  
+  copy_cr = cairo_create (copy_surface);
+  cairo_set_source_surface (copy_cr, src_surface, -from->x, -from->y);
+  
+  cairo_paint (copy_cr);
+
+  // Whitening the original rectangle
+  cairo_rectangle (cr, from->x, from->y, copy_area_width, copy_area_height);
+  cairo_set_source_rgb (cr, 1, 1, 1);
+  cairo_fill (cr);
+  
+  cairo_set_source_surface (cr, copy_surface, to->x, to->y);
+  
+  cairo_paint (cr);
+  
+  cairo_surface_destroy (copy_surface);
+  cairo_destroy (copy_cr);
+}
+

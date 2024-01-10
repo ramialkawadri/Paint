@@ -39,6 +39,7 @@ struct _Toolbar
   GtkButton            *text_button;
   GtkButton            *fill_button;
   GtkButton            *color_picker_button;
+  GtkButton            *select_button;
 };
 
 enum {
@@ -149,6 +150,15 @@ on_color_picker_button_click (GtkButton *button,
   update_current_selected_tool (self, self->color_picker_button, COLOR_PICKER);
 }
 
+
+static void
+on_select_button_click (GtkButton *button,
+                        gpointer   user_data)
+{
+  Toolbar *self = user_data;
+  update_current_selected_tool (self, self->select_button, SELECT);
+}
+
 const GdkRGBA *
 toolbar_get_current_color (Toolbar *self)
 {
@@ -203,6 +213,7 @@ toolbar_class_init (ToolbarClass *klass)
   gtk_widget_class_bind_template_child (widget_class, Toolbar, text_button);
   gtk_widget_class_bind_template_child (widget_class, Toolbar, fill_button);
   gtk_widget_class_bind_template_child (widget_class, Toolbar, color_picker_button);
+  gtk_widget_class_bind_template_child (widget_class, Toolbar, select_button);
 
   /* Callbacks */
   gtk_widget_class_bind_template_callback (widget_class, on_open_button_click);
@@ -215,6 +226,7 @@ toolbar_class_init (ToolbarClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_text_button_click);
   gtk_widget_class_bind_template_callback (widget_class, on_fill_button_click);
   gtk_widget_class_bind_template_callback (widget_class, on_color_picker_button_click);
+  gtk_widget_class_bind_template_callback (widget_class, on_select_button_click);
 
   /* Signals */
   toolbar_signals[OPEN_FILE] = g_signal_new ("open-file",

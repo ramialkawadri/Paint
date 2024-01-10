@@ -26,6 +26,7 @@ typedef enum _DRAWING_TOOL {
   RECTANGLE,
   CIRCLE,
   LINE,
+  SELECT,
   TEXT,
   FILL,
   COLOR_PICKER,

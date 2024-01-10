@@ -29,6 +29,7 @@
 #include "drawing-tools/fill.h"
 #include "drawing-tools/line.h"
 #include "drawing-tools/rectangle.h"
+#include "drawing-tools/select.h"
 #include "drawing-tools/text.h"
 
 #include "utils/canvas-region-caretaker.h"
@@ -66,7 +67,10 @@ struct _CanvasRegion
   gchar                 *current_filename;
   gboolean               is_current_file_saved;
   gboolean               save_while_drawing;
+
   CanvasRegionCaretaker *caretaker;
+  GdkRectangle           selection_rectangle;
+  GdkRectangle           selection_destination;
 };
 
 enum {
@@ -84,6 +88,20 @@ static void
 show_save_file_dialog (CanvasRegion       *self,
                        GAsyncReadyCallback cb,
                        CanvasRegionUserData *user_data);
+
+static void
+reset_selection (CanvasRegion *self)
+{
+  self->selection_rectangle.x = 0;
+  self->selection_rectangle.y = 0;
+  self->selection_rectangle.width = 0;
+  self->selection_rectangle.height = 0;
+
+  self->selection_destination.x = 0;
+  self->selection_destination.y = 0;
+  self->selection_destination.width = 0;
+  self->selection_destination.height = 0;
+}
 
 static void
 create_and_save_snapshot (CanvasRegion *self)
@@ -474,6 +492,19 @@ on_gesture_drag_update (GtkGestureDrag *gesture,
 }
 
 static void
+canvas_region_move_selection (CanvasRegion *self)
+{
+  cairo_t *cr;
+
+  cr = cairo_create (self->cairo_surface_save);
+
+  cairo_move_rectangle (self->cairo_surface_save, cr,
+                        &self->selection_rectangle, &self->selection_destination);
+
+  cairo_destroy (cr);
+}
+
+static void
 on_gesture_drag_end (GtkGestureDrag *gesture,
                      gdouble         offset_x,
                      gdouble         offset_y,
@@ -482,11 +513,27 @@ on_gesture_drag_end (GtkGestureDrag *gesture,
   CanvasRegion *self = user_data;
 
   // Nothing changed
-  if (self->current_tool_type == COLOR_PICKER)
+  if (self->current_tool_type == COLOR_PICKER ||
+        (self->current_tool_type == SELECT && !self->draw_event.is_dragging_selection))
     return;
 
+  self->draw_event.is_dragging_selection = false;
   set_is_current_file_saved (self, false);
-  save_and_destroy_current_surface (self);
+
+  if (self->current_tool_type == SELECT)
+    {
+      // TODO: refactor those two line to own method
+      cairo_surface_destroy (self->cairo_surface);
+      self->cairo_surface = NULL;
+      canvas_region_move_selection (self);
+      create_and_save_snapshot (self);
+      reset_selection (self);
+      gtk_widget_queue_draw (GTK_WIDGET (self->drawing_area));
+    }
+  else
+    {
+      save_and_destroy_current_surface (self);
+    }
 }
 
 static void
@@ -690,6 +737,9 @@ void
 canvas_region_set_selected_tool (CanvasRegion      *self,
                                  DRAWING_TOOL_TYPE  tool)
 {
+  if (tool == self->current_tool_type)
+    return;
+
   self->current_tool_type = tool;
 
   switch (tool)
@@ -736,6 +786,16 @@ canvas_region_set_selected_tool (CanvasRegion      *self,
       self->save_while_drawing = false;
       self->draw_start_click_cb = &on_fill_draw_start_click;
       self->draw_cb = NULL;
+      break;
+
+    case SELECT:
+      self->save_while_drawing = false;
+      self->draw_start_click_cb = &on_select_draw_start_click;
+      self->draw_cb = &on_select_draw;
+      self->selection_rectangle.x = 0;
+      self->selection_rectangle.y = 0;
+      self->selection_rectangle.width = 0;
+      self->selection_rectangle.height = 0;
       break;
 
     default:
@@ -820,6 +880,28 @@ canvas_region_emit_color_picked_signal (CanvasRegion *self,
   g_signal_emit (self, canvas_region_signals[COLOR_PICKED], 0, color);
 }
 
+GdkRectangle
+canvas_region_get_selection_rectangle (CanvasRegion *self)
+{
+    return self->selection_rectangle;
+}
+
+
+void
+canvas_region_set_selection_rectangle (CanvasRegion *self,
+                                       GdkRectangle  rect)
+{
+    self->selection_rectangle = rect;
+}
+
+
+void
+canvas_region_set_selection_destnation (CanvasRegion *self,
+                                        GdkRectangle  dest)
+{
+  self->selection_destination = dest;
+}
+
 static void
 canvas_region_init (CanvasRegion *self)
 {
@@ -838,6 +920,8 @@ canvas_region_init (CanvasRegion *self)
 
   self->cairo_surface_save = cairo_image_surface_create (CAIRO_FORMAT_RGB24,
                                                          self->width, self->height);
+
+  self->draw_event.is_dragging_selection = false;
 
   cairo_whiten_surface (self->cairo_surface_save);
 
@@ -925,3 +1009,4 @@ canvas_region_class_init (CanvasRegionClass *klass)
   /* Dispose */
   G_OBJECT_CLASS (klass)->dispose = canvas_region_dispose;
 }
+

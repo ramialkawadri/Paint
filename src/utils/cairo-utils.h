@@ -27,3 +27,9 @@ GdkRGBA         *cairo_get_pixel_color_at (guchar          *pixels,
                                            cairo_surface_t *cairo_surface,
                                            gint             x,
                                            gint             y);
+
+void             cairo_move_rectangle     (cairo_surface_t *src,
+                                           cairo_t         *cr,
+                                           GdkRectangle    *from,
+                                           GdkRectangle    *to);
+

@@ -264,6 +264,28 @@
           </object>
         </child>
 
+        <!--Select-->
+        <child>
+          <object class="GtkButton" id="select_button">
+            <signal name="clicked" handler="on_select_button_click" object="Toolbar"
+              swapped="no" />
+
+            <property name="tooltip-text">Select</property>
+
+            <property name="child">
+              <object class="AdwButtonContent">
+                <property name="icon-name">edit-select-all-symbolic</property>
+                <property name="use-underline">True</property>
+              </object>
+            </property>
+
+            <layout>
+              <property name="column">4</property>
+              <property name="row">0</property>
+            </layout>
+          </object>
+        </child>
+
       </object>
     </child>
 
