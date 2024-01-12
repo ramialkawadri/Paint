@@ -216,7 +216,8 @@ paint_window_class_init (PaintWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_toolbar_file_save);
   gtk_widget_class_bind_template_callback (widget_class, on_toolbar_tool_change);
   gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_file_save_status_change);
-  gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_color_picked); gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_resize);
+  gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_color_picked);
+  gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_resize);
 
   /* Actions */
   gtk_widget_class_install_action (widget_class, "win.undo", NULL, undo_activated);
