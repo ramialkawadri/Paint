@@ -41,22 +41,6 @@ struct _PaintWindow
 G_DEFINE_FINAL_TYPE (PaintWindow, paint_window, ADW_TYPE_APPLICATION_WINDOW)
 
 static void
-on_undo (GtkButton *button,
-         gpointer   user_data)
-{
-  PaintWindow *self = user_data;
-  canvas_region_undo (self->canvas_region);
-}
-
-static void
-on_redo (GtkButton *button,
-         gpointer   user_data)
-{
-  PaintWindow *self = user_data;
-  canvas_region_redo (self->canvas_region);
-}
-
-static void
 on_file_dialog_save_finish (CanvasRegion *canvas_region)
 {
   GtkRoot *root = gtk_widget_get_root (GTK_WIDGET (canvas_region));
@@ -132,7 +116,7 @@ get_window_title (gboolean is_file_saved,
   file = NULL;
 
   if (filename == NULL)
-    return "*Paint - Untitled";
+    return is_file_saved ? "Paint" : "*Paint - Untitled";
 
   file = g_file_parse_name (filename);
   file_basename = g_file_get_basename (file);
@@ -176,28 +160,40 @@ on_canvas_region_resize (CanvasRegion *canvas_region,
   gtk_label_set_label (self->size_label, text);
 }
 
-void
-paint_window_save_current_file (PaintWindow *self)
+static void
+undo_activated (GtkWidget  *widget,
+                const char *action_name,
+                GVariant   *parameter)
 {
-  canvas_region_save (self->canvas_region, NULL);
-}
-
-void
-paint_window_open_new_file (PaintWindow *self)
-{
-  canvas_region_open_new_file (self->canvas_region);
-}
-
-void
-paint_window_undo (PaintWindow *self)
-{
+  PaintWindow *self = PAINT_WINDOW (widget);
   canvas_region_undo (self->canvas_region);
 }
 
-void
-paint_window_redo (PaintWindow *self)
+static void
+redo_activated (GtkWidget  *widget,
+                const char *action_name,
+                GVariant   *parameter)
 {
+  PaintWindow *self = PAINT_WINDOW (widget);
   canvas_region_redo (self->canvas_region);
+}
+
+static void
+save_activated (GtkWidget  *widget,
+                const char *action_name,
+                GVariant   *parameter)
+{
+  PaintWindow *self = PAINT_WINDOW (widget);
+  canvas_region_save (self->canvas_region, NULL);
+}
+
+static void
+open_activated (GtkWidget  *widget,
+                const char *action_name,
+                GVariant   *parameter)
+{
+  PaintWindow *self = PAINT_WINDOW (widget);
+  canvas_region_open_new_file (self->canvas_region);
 }
 
 static void
@@ -215,15 +211,18 @@ paint_window_class_init (PaintWindowClass *klass)
   gtk_widget_class_bind_template_child (widget_class, PaintWindow, size_label);
 
   /* Callback */
-  gtk_widget_class_bind_template_callback (widget_class, on_undo);
-  gtk_widget_class_bind_template_callback (widget_class, on_redo);
   gtk_widget_class_bind_template_callback (widget_class, on_close_request);
   gtk_widget_class_bind_template_callback (widget_class, on_toolbar_file_open);
   gtk_widget_class_bind_template_callback (widget_class, on_toolbar_file_save);
   gtk_widget_class_bind_template_callback (widget_class, on_toolbar_tool_change);
   gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_file_save_status_change);
-  gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_color_picked);
-  gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_resize);
+  gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_color_picked); gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_resize);
+
+  /* Actions */
+  gtk_widget_class_install_action (widget_class, "win.undo", NULL, undo_activated);
+  gtk_widget_class_install_action (widget_class, "win.redo", NULL, redo_activated);
+  gtk_widget_class_install_action (widget_class, "win.save", NULL, save_activated);
+  gtk_widget_class_install_action (widget_class, "win.open", NULL, open_activated);
 
   /* Types */
   g_type_ensure (PAINT_TYPE_CANVAS_REGION);

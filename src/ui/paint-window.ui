@@ -22,10 +22,8 @@
                 
                 <child>
                   <object class="GtkButton">
-                    <signal name="clicked" handler="on_undo" object="PaintWindow"
-                      swapped="no" />
-
                     <property name="tooltip-text">Undo</property>
+                    <property name="action-name">win.undo</property>
 
                     <property name="child">
                       <object class="AdwButtonContent">
@@ -38,10 +36,8 @@
 
                 <child>
                   <object class="GtkButton">
-                    <signal name="clicked" handler="on_redo" object="PaintWindow"
-                      swapped="no" />
-
                     <property name="tooltip-text">Redo</property>
+                    <property name="action-name">win.redo</property>
 
                     <property name="child">
                       <object class="AdwButtonContent">

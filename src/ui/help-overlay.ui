@@ -19,14 +19,14 @@
             <child>
               <object class="GtkShortcutsShortcut">
                 <property name="title" translatable="yes" context="shortcut window">Save</property>
-                <property name="action-name">app.save</property>
+                <property name="action-name">win.save</property>
               </object>
             </child>
 
             <child>
               <object class="GtkShortcutsShortcut">
                 <property name="title" translatable="yes" context="shortcut window">Open</property>
-                <property name="action-name">app.open</property>
+                <property name="action-name">win.open</property>
               </object>
             </child>
 
@@ -42,19 +42,19 @@
         <child>
 
           <object class="GtkShortcutsGroup">
-            <property name="title" translatable="yes" context="shortcut window">Undo and Redo</property>
+            <property name="title" translatable="yes" context="shortcut window">Undo &amp; Redo</property>
 
             <child>
               <object class="GtkShortcutsShortcut">
                 <property name="title" translatable="yes" context="shortcut window">Undo</property>
-                <property name="action-name">app.undo</property>
+                <property name="action-name">win.undo</property>
               </object>
             </child>
 
             <child>
               <object class="GtkShortcutsShortcut">
                 <property name="title" translatable="yes" context="shortcut window">Redo</property>
-                <property name="action-name">app.redo</property>
+                <property name="action-name">win.redo</property>
               </object>
             </child>
 
