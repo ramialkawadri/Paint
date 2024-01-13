@@ -77,28 +77,16 @@ on_select_draw_start_click (CanvasRegion *canvas_region,
                             cairo_t      *cr,
                             DrawEvent    *draw_event)
 {
-    GdkRectangle selection_rect;
-    gint end_x;
-    gint end_y;
+    GdkRectangle selection_rect = canvas_region_get_selection_rectangle (canvas_region);
 
-    selection_rect = canvas_region_get_selection_rectangle (canvas_region);
+    draw_event->is_dragging_selection =
+        point_is_inside_rectangle (&draw_event->current_mouse_position, &selection_rect);
 
-    end_x = selection_rect.x + selection_rect.width;
-    end_y = selection_rect.y + selection_rect.height;
-
-    if (draw_event->current_mouse_position.x < selection_rect.x ||
-            draw_event->current_mouse_position.x > end_x ||
-            draw_event->current_mouse_position.y < selection_rect.y ||
-            draw_event->current_mouse_position.y > end_y)
+    if (draw_event->is_dragging_selection)
       {
-        draw_event->is_dragging_selection = false;
-        return;
+        draw_event->selection_offset.x = draw_event->current_mouse_position.x - selection_rect.x;
+        draw_event->selection_offset.y = draw_event->current_mouse_position.y - selection_rect.y;
       }
-
-    draw_event->is_dragging_selection = true;
-
-    draw_event->selection_offset.x = draw_event->current_mouse_position.x - selection_rect.x;
-    draw_event->selection_offset.y = draw_event->current_mouse_position.y - selection_rect.y;
 }
 
 void

@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <gdk/gdk.h>
 #include <glib.h>
 
 typedef struct _Point {
@@ -27,7 +28,10 @@ typedef struct _Point {
   gint y;
 } Point;
 
-Point *point_new     (gint x,
-                      gint y);
+Point   *point_new                 (gint x,
+                                    gint y);
 
-void   point_dispose (Point *self);
+void     point_dispose             (Point *self);
+
+gboolean point_is_inside_rectangle (Point        *self,
+                                    GdkRectangle *rectangle);

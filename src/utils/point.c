@@ -35,3 +35,11 @@ point_dispose (Point *self)
 {
   g_free (self);
 }
+
+gboolean
+point_is_inside_rectangle (Point        *self,
+                           GdkRectangle *rectangle)
+{
+  return rectangle->x <= self->x && self->x <= rectangle->x + rectangle->width &&
+      rectangle->y <= self->y && self->y <= rectangle->y + rectangle->height;
+}

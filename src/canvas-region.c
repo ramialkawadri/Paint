@@ -531,6 +531,29 @@ on_gesture_drag_end (GtkGestureDrag *gesture,
 }
 
 static void
+on_motion (GtkEventControllerMotion *controller,
+           gdouble                  x,
+           gdouble                  y,
+           gpointer                 user_data)
+{
+  CanvasRegion *self = user_data;
+  Point current_point;
+
+  current_point.x = x;
+  current_point.y = y;
+
+  if (self->draw_event.is_dragging_selection || 
+          point_is_inside_rectangle (&current_point, &self->selection_rectangle))
+    {
+      gtk_widget_set_cursor_from_name (GTK_WIDGET (self->drawing_area), "move");
+    }
+  else
+    {
+      gtk_widget_set_cursor_from_name (GTK_WIDGET (self->drawing_area), "default");
+    }
+}
+
+static void
 on_resize_corner_drag_update (GtkGestureDrag *gesture,
                               gdouble        offset_x,
                               gdouble        offset_y,
@@ -696,6 +719,7 @@ canvas_region_class_init (CanvasRegionClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_gesture_drag_begin);
   gtk_widget_class_bind_template_callback (widget_class, on_gesture_drag_update);
   gtk_widget_class_bind_template_callback (widget_class, on_gesture_drag_end);
+  gtk_widget_class_bind_template_callback (widget_class, on_motion);
   gtk_widget_class_bind_template_callback (widget_class, on_resize_corner_drag_update);
   gtk_widget_class_bind_template_callback (widget_class, on_resize_corner_drag_end);
   gtk_widget_class_bind_template_callback (widget_class, on_text_popover_text_change);
@@ -871,6 +895,10 @@ canvas_region_set_selected_tool (CanvasRegion      *self,
 {
   if (tool == self->current_tool_type)
     return;
+
+  destroy_current_surface (self);
+  reset_selection (self);
+  gtk_widget_queue_draw (GTK_WIDGET (self->drawing_area));
 
   self->current_tool_type = tool;
 
