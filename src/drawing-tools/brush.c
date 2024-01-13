@@ -20,19 +20,6 @@
 
 #include "brush.h"
 
-void
-on_brush_draw_start_click (CanvasRegion *self,
-                           cairo_t      *cr,
-                           DrawEvent    *draw_event)
-{
-  cairo_arc (cr,
-             draw_event->current.x,
-             draw_event->current.y,
-             draw_event->draw_size / 2,
-             0, 2 * G_PI);
-  cairo_fill (cr);
-}
-
 /**
  * Returns the next point with distance d from the point (x0, y0) on the line y = mx + b.
  */
@@ -64,24 +51,24 @@ draw_along_x_axis (cairo_t   *cr,
   
   gdouble r;
 
-  delta_x = draw_event->current.x - draw_event->last.x;
-  delta_y = draw_event->current.y - draw_event->last.y;
+  delta_x = draw_event->current_mouse_position.x - draw_event->last_drawn_point.x;
+  delta_y = draw_event->current_mouse_position.y - draw_event->last_drawn_point.y;
 
   m = delta_y / delta_x;
-  b = draw_event->current.y - m * draw_event->current.x;
+  b = draw_event->current_mouse_position.y - m * draw_event->current_mouse_position.x;
 
-  x = draw_event->last.x;
-  y = draw_event->last.y;
-  end_x = draw_event->current.x;
+  x = draw_event->last_drawn_point.x;
+  y = draw_event->last_drawn_point.y;
+  end_x = draw_event->current_mouse_position.x;
    
   r = draw_event->draw_size / 2;
 
-  if (draw_event->last.x > draw_event->current.x)
+  if (draw_event->last_drawn_point.x > draw_event->current_mouse_position.x)
     {
-      x = draw_event->current.x;
-      y = draw_event->current.y;
+      x = draw_event->current_mouse_position.x;
+      y = draw_event->current_mouse_position.y;
 
-      end_x = draw_event->last.x;
+      end_x = draw_event->last_drawn_point.x;
     }
 
   while (x <= end_x)
@@ -113,24 +100,24 @@ draw_along_y_axis (cairo_t   *cr,
 
   gdouble r;
 
-  delta_x = draw_event->current.x - draw_event->last.x;
-  delta_y = draw_event->current.y - draw_event->last.y;
+  delta_x = draw_event->current_mouse_position.x - draw_event->last_drawn_point.x;
+  delta_y = draw_event->current_mouse_position.y - draw_event->last_drawn_point.y;
 
   m = delta_x / delta_y;
-  b = draw_event->current.x - m * draw_event->current.y;
+  b = draw_event->current_mouse_position.x - m * draw_event->current_mouse_position.y;
 
-  x = draw_event->last.x;
-  y = draw_event->last.y;
-  end_y = draw_event->current.y;
+  x = draw_event->last_drawn_point.x;
+  y = draw_event->last_drawn_point.y;
+  end_y = draw_event->current_mouse_position.y;
 
   r = draw_event->draw_size / 2;
 
-  if (draw_event->last.y > draw_event->current.y)
+  if (draw_event->last_drawn_point.y > draw_event->current_mouse_position.y)
     {
-      x = draw_event->current.x;
-      y = draw_event->current.y;
+      x = draw_event->current_mouse_position.x;
+      y = draw_event->current_mouse_position.y;
 
-      end_y = draw_event->last.y;
+      end_y = draw_event->last_drawn_point.y;
     }
 
   while (y <= end_y)
@@ -144,15 +131,28 @@ draw_along_y_axis (cairo_t   *cr,
 }
 
 void
-on_brush_draw (CanvasRegion *self,
+on_brush_draw_start_click (CanvasRegion *canvas_region,
+                           cairo_t      *cr,
+                           DrawEvent    *draw_event)
+{
+  cairo_arc (cr,
+             draw_event->current_mouse_position.x,
+             draw_event->current_mouse_position.y,
+             draw_event->draw_size / 2,
+             0, 2 * G_PI);
+  cairo_fill (cr);
+}
+
+void
+on_brush_draw (CanvasRegion *canvas_region,
                cairo_t      *cr,
                DrawEvent    *draw_event)
 {
   gdouble delta_x;
   gdouble delta_y;
 
-  delta_x = ABS (draw_event->current.x - draw_event->last.x);
-  delta_y = ABS (draw_event->current.y - draw_event->last.y);
+  delta_x = ABS (draw_event->current_mouse_position.x - draw_event->last_drawn_point.x);
+  delta_y = ABS (draw_event->current_mouse_position.y - draw_event->last_drawn_point.y);
 
   if (delta_x < delta_y)
     draw_along_y_axis (cr, draw_event);

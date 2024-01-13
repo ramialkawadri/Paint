@@ -21,9 +21,10 @@
 #pragma once
 
 #include <gtk/gtk.h>
+
 #include "draw-event.h"
-#include "toolbar.h"
 #include "drawing-tools/drawing-tool-type.h"
+#include "toolbar.h"
 
 G_BEGIN_DECLS
 
@@ -32,14 +33,14 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (CanvasRegion, canvas_region, PAINT, CANVAS_REGION, GtkGrid)
 
 /* Callback types */
-typedef void (*on_draw_start_click) (CanvasRegion *self,
+typedef void (*on_draw_start_click) (CanvasRegion *canvas_region,
                                      cairo_t      *cr,
                                      DrawEvent    *draw_event);
-typedef void (*on_draw)             (CanvasRegion *self,
+typedef void (*on_draw)             (CanvasRegion *canvas_region,
                                      cairo_t      *cr,
                                      DrawEvent    *draw_event);
 
-typedef void (*on_save_finish)      (CanvasRegion *self);
+typedef void (*on_save_finish)      (CanvasRegion *canvas_region);
 
 /* Methods */
 void                canvas_region_set_toolbar                 (CanvasRegion        *self,
@@ -77,4 +78,3 @@ void                canvas_region_set_selection_destnation    (CanvasRegion     
                                                                GdkRectangle        dest);
 
 G_END_DECLS
-

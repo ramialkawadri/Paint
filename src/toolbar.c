@@ -21,6 +21,13 @@
 #include "toolbar.h"
 #include "drawing-tools/drawing-tool-type.h"
 
+enum {
+  OPEN_FILE,
+  SAVE_FILE,
+  TOOL_CHANGE,
+  NUMBER_OF_SIGNALS
+};
+
 struct _Toolbar
 {
   /* Widgets */
@@ -42,18 +49,11 @@ struct _Toolbar
   GtkButton            *select_button;
 };
 
-enum {
-  OPEN_FILE,
-  SAVE_FILE,
-  TOOL_CHANGE,
-  NUMBER_OF_SIGNALS
-};
+G_DEFINE_FINAL_TYPE (Toolbar, toolbar, GTK_TYPE_BOX);
 
 static guint toolbar_signals[NUMBER_OF_SIGNALS];
 
 static const gchar *SELECTED_TOOL_CSS_CLASS = "suggested-action";
-
-G_DEFINE_FINAL_TYPE (Toolbar, toolbar, GTK_TYPE_BOX);
 
 static void
 on_open_button_click (GtkButton *button,
@@ -159,25 +159,6 @@ on_select_button_click (GtkButton *button,
   update_current_selected_tool (self, self->select_button, SELECT);
 }
 
-const GdkRGBA *
-toolbar_get_current_color (Toolbar *self)
-{
-  return gtk_color_dialog_button_get_rgba (self->color_button);
-}
-
-gdouble
-toolbar_get_draw_size (Toolbar *self)
-{
-  return gtk_spin_button_get_value (self->drawing_size_spin_button);
-}
-
-void
-toolbar_set_selected_color (Toolbar *self,
-                            GdkRGBA *color)
-{
-  gtk_color_dialog_button_set_rgba (self->color_button, color);
-}
-
 static void
 toolbar_init (Toolbar *self)
 {
@@ -262,4 +243,23 @@ toolbar_class_init (ToolbarClass *klass)
 
   /* Dispose */
   G_OBJECT_CLASS (klass)->dispose = toolbar_dispose;
+}
+
+const GdkRGBA *
+toolbar_get_current_color (Toolbar *self)
+{
+  return gtk_color_dialog_button_get_rgba (self->color_button);
+}
+
+gdouble
+toolbar_get_draw_size (Toolbar *self)
+{
+  return gtk_spin_button_get_value (self->drawing_size_spin_button);
+}
+
+void
+toolbar_set_selected_color (Toolbar *self,
+                            GdkRGBA *color)
+{
+  gtk_color_dialog_button_set_rgba (self->color_button, color);
 }

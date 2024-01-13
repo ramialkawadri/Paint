@@ -23,10 +23,10 @@
 #include "canvas-region.h"
 #include "draw-event.h"
 
-void on_text_draw_start_click (CanvasRegion *self,
+void on_text_draw_start_click (CanvasRegion *canvas_region,
                                cairo_t      *cr,
                                DrawEvent    *draw_event);
 
-void on_text_draw             (CanvasRegion *self,
+void on_text_draw             (CanvasRegion *canvas_region,
                                cairo_t      *cr,
                                DrawEvent    *draw_event);

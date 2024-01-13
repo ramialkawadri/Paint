@@ -13,7 +13,7 @@
 
         <child>
           <object class="GtkGestureClick">
-            <signal name="pressed" handler="drawing_area_on_mouse_press" object="CanvasRegion"
+            <signal name="pressed" handler="on_mouse_press" object="CanvasRegion"
               swapped="no" />
           </object>
         </child>

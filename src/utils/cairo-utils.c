@@ -118,4 +118,3 @@ cairo_move_rectangle (cairo_surface_t *src_surface,
   cairo_surface_destroy (copy_surface);
   cairo_destroy (copy_cr);
 }
-

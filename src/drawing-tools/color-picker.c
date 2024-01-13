@@ -22,7 +22,7 @@
 #include "utils/cairo-utils.h"
 
 void
-on_color_picker_draw_start_click (CanvasRegion *self,
+on_color_picker_draw_start_click (CanvasRegion *canvas_region,
                                   cairo_t      *cr,
                                   DrawEvent    *draw_event)
 {
@@ -30,11 +30,12 @@ on_color_picker_draw_start_click (CanvasRegion *self,
   cairo_surface_t *cairo_surface;
   GdkRGBA *color;
 
-  cairo_surface = canvas_region_get_image_surface (self);
+  cairo_surface = canvas_region_get_image_surface (canvas_region);
   pixels = cairo_image_surface_get_data (cairo_surface);
   color = cairo_get_pixel_color_at (pixels,
                                     cairo_surface,
-                                    draw_event->current.x, draw_event->current.y);
+                                    draw_event->current_mouse_position.x,
+                                    draw_event->current_mouse_position.y);
 
-  canvas_region_emit_color_picked_signal (self, color);
+  canvas_region_emit_color_picked_signal (canvas_region, color);
 }

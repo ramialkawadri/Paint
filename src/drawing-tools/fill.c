@@ -123,7 +123,7 @@ fill_surrounding_region_that_has_color (cairo_t         *cr,
 }
 
 void
-on_fill_draw_start_click (CanvasRegion *self,
+on_fill_draw_start_click (CanvasRegion *canvas_region,
                           cairo_t      *cr,
                           DrawEvent    *draw_event)
 {
@@ -133,7 +133,7 @@ on_fill_draw_start_click (CanvasRegion *self,
   gint height;
   gint width;
 
-  cairo_surface = canvas_region_get_image_surface (self);
+  cairo_surface = canvas_region_get_image_surface (canvas_region);
 
   width = cairo_image_surface_get_width (cairo_surface);
   height = cairo_image_surface_get_height (cairo_surface);
@@ -141,7 +141,7 @@ on_fill_draw_start_click (CanvasRegion *self,
   pixels = cairo_image_surface_get_data (cairo_surface);
   original_color = cairo_get_pixel_color_at (pixels,
                                              cairo_surface,
-                                             draw_event->current.x, draw_event->current.y);
+                                             draw_event->current_mouse_position.x, draw_event->current_mouse_position.y);
 
   fill_surrounding_region_that_has_color (cr,
                                           cairo_surface,
@@ -149,8 +149,8 @@ on_fill_draw_start_click (CanvasRegion *self,
                                           original_color,
                                           width,
                                           height,
-                                          draw_event->current.x,
-                                          draw_event->current.y);
+                                          draw_event->current_mouse_position.x,
+                                          draw_event->current_mouse_position.y);
 
   g_free (original_color);
 }

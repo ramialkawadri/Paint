@@ -8,7 +8,7 @@
 .bottom-toolbar {
   padding: 4px 12px;
   border-top: 1px solid rgba(0, 0, 0, 0.4);
-  background-color: rgb(245, 245, 245);
+  background-color: @window_bg_color;
 }
 
 .ColorButtonContainer {
@@ -16,7 +16,7 @@
 }
 
 .canvas-region {
-  background-color: rgb(222, 222, 222);
+  background-color: @sidebar_bg_color;
   padding-right: 24px;
   padding-bottom: 24px;
 }
@@ -24,10 +24,11 @@
 .canvas-region-corner {
   background-color: #ffffff;
   padding: 4px;
-  box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 6px;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 8px;
   border: 1px solid rgba(0, 0, 0, 0.7);
+  border-radius: 0px;
 }
 
 .drawing-area {
-  box-shadow: rgba(0, 0, 0, 0.12) 8px 8px 8px;
+  box-shadow: rgba(0, 0, 0, 0.2) 8px 8px 34px;
 }

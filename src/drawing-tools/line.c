@@ -21,12 +21,12 @@
 #include "line.h"
 
 void
-on_line_draw (CanvasRegion *self,
+on_line_draw (CanvasRegion *canvas_region,
               cairo_t      *cr,
               DrawEvent    *draw_event)
 {
-  cairo_move_to (cr, draw_event->start.x, draw_event->start.y);
-  cairo_line_to (cr, draw_event->current.x, draw_event->current.y);
+  cairo_move_to (cr, draw_event->drag_start.x, draw_event->drag_start.y);
+  cairo_line_to (cr, draw_event->current_mouse_position.x, draw_event->current_mouse_position.y);
 
   cairo_set_line_width (cr, draw_event->draw_size);
   cairo_stroke (cr);

@@ -19,56 +19,28 @@
  */
 
 #include "utils/cairo-utils.h"
+#include "utils/colors.h"
 #include "select.h"
 #include "cairo.h"
 
 static gdouble SELECTION_DASH_PATTERN[] = { 6 };
 static gint    SELECTION_LINE_WIDTH = 6;
-static GdkRGBA SELECTION_RECTANGLE_COLOR = { 0.125, 0.310, 0.537, 0.8};
-
-void
-on_select_draw_start_click (CanvasRegion *self,
-                            cairo_t      *cr,
-                            DrawEvent    *draw_event)
-{
-    GdkRectangle selection_rect = canvas_region_get_selection_rectangle (self);
-    gint end_x;
-    gint end_y;
-
-    end_x = selection_rect.x + selection_rect.width;
-    end_y = selection_rect.y + selection_rect.height;
-
-    if (draw_event->current.x < selection_rect.x ||
-            draw_event->current.x > end_x ||
-            draw_event->current.y < selection_rect.y ||
-            draw_event->current.y > end_y)
-      {
-        draw_event ->is_dragging_selection = false;
-        return;
-      }
-
-    draw_event->is_dragging_selection = true;
-
-    draw_event->selection_offset.x = draw_event->current.x - selection_rect.x;
-    draw_event->selection_offset.y = draw_event->current.y - selection_rect.y;
-}
+static gint    NUM_DASHES = 1;
+static gdouble DASH_OFFSET = 0;
 
 static void
 draw_selection_rectangle (cairo_t      *cr,
                           GdkRectangle *rect)
 {
   gdk_cairo_set_source_rgba (cr, &SELECTION_RECTANGLE_COLOR);
-
   cairo_set_line_width (cr, SELECTION_LINE_WIDTH);
-  cairo_set_dash (cr, SELECTION_DASH_PATTERN, 1, 0);
-
+  cairo_set_dash (cr, SELECTION_DASH_PATTERN, NUM_DASHES, DASH_OFFSET);
   cairo_rectangle (cr, rect->x, rect->y, rect->width, rect->height);
-
   cairo_stroke (cr);
 }
 
 static void
-move_selection (CanvasRegion *self,
+move_selection (CanvasRegion *canvas_region,
                 cairo_t      *cr,
                 DrawEvent    *draw_event)
 {
@@ -78,50 +50,85 @@ move_selection (CanvasRegion *self,
   gint surface_width;
   gint surface_height;
 
-  selection_rect = canvas_region_get_selection_rectangle (self);
-  cr_surface = canvas_region_get_image_surface (self);
+  selection_rect = canvas_region_get_selection_rectangle (canvas_region);
+  cr_surface = canvas_region_get_image_surface (canvas_region);
   surface_width = cairo_image_surface_get_width (cr_surface);
   surface_height = cairo_image_surface_get_height (cr_surface);
 
-  dest_rect.x = draw_event->current.x - draw_event->selection_offset.x;
-  dest_rect.y = draw_event->current.y - draw_event->selection_offset.y;
+  dest_rect.x = draw_event->current_mouse_position.x - draw_event->selection_offset.x;
+  dest_rect.y = draw_event->current_mouse_position.y - draw_event->selection_offset.y;
 
-  // To not have a rectangle bigger than the selection
+  // Avoid going out of bounds
   dest_rect.width = selection_rect.width + selection_rect.x > surface_width ?
     surface_width - selection_rect.x : selection_rect.width;
 
   dest_rect.height = selection_rect.height + selection_rect.y > surface_height ?
     surface_height - selection_rect.y : selection_rect.height;
 
-  cairo_move_rectangle (cr_surface,
-                        cr, &selection_rect, &dest_rect);
+  cairo_move_rectangle (cr_surface, cr, &selection_rect, &dest_rect);
 
   draw_selection_rectangle (cr, &dest_rect);
 
-  canvas_region_set_selection_destnation (self, dest_rect);
+  canvas_region_set_selection_destnation (canvas_region, dest_rect);
 }
 
 void
-on_select_draw (CanvasRegion *self,
+on_select_draw_start_click (CanvasRegion *canvas_region,
+                            cairo_t      *cr,
+                            DrawEvent    *draw_event)
+{
+    GdkRectangle selection_rect;
+    gint end_x;
+    gint end_y;
+
+    selection_rect = canvas_region_get_selection_rectangle (canvas_region);
+
+    end_x = selection_rect.x + selection_rect.width;
+    end_y = selection_rect.y + selection_rect.height;
+
+    if (draw_event->current_mouse_position.x < selection_rect.x ||
+            draw_event->current_mouse_position.x > end_x ||
+            draw_event->current_mouse_position.y < selection_rect.y ||
+            draw_event->current_mouse_position.y > end_y)
+      {
+        draw_event->is_dragging_selection = false;
+        return;
+      }
+
+    draw_event->is_dragging_selection = true;
+
+    draw_event->selection_offset.x = draw_event->current_mouse_position.x - selection_rect.x;
+    draw_event->selection_offset.y = draw_event->current_mouse_position.y - selection_rect.y;
+}
+
+void
+on_select_draw (CanvasRegion *canvas_region,
                 cairo_t      *cr,
                 DrawEvent    *draw_event)
 {
   GdkRectangle selection_rect;
 
-  selection_rect.x = MIN (draw_event->current.x, draw_event->start.x); 
-  selection_rect.y = MIN (draw_event->current.y, draw_event->start.y);
+  selection_rect.x = MIN (draw_event->current_mouse_position.x, draw_event->drag_start.x); 
+  selection_rect.y = MIN (draw_event->current_mouse_position.y, draw_event->drag_start.y);
 
-  selection_rect.width = ABS (draw_event->current.x - draw_event->start.x);
-  selection_rect.height = ABS (draw_event->current.y - draw_event->start.y);
+  if (selection_rect.x < 0)
+      selection_rect.x = 0;
+
+  if (selection_rect.y < 0)
+      selection_rect.y = 0;
+
+  selection_rect.width = ABS (MAX (draw_event->current_mouse_position.x, 0) -
+      draw_event->drag_start.x);
+  selection_rect.height = ABS (MAX (draw_event->current_mouse_position.y, 0) -
+      draw_event->drag_start.y);
 
   if (draw_event->is_dragging_selection)
     {
-      move_selection (self, cr, draw_event);
+      move_selection (canvas_region, cr, draw_event);
     }
   else
     {
       draw_selection_rectangle (cr, &selection_rect);
-      canvas_region_set_selection_rectangle (self, selection_rect);
+      canvas_region_set_selection_rectangle (canvas_region, selection_rect);
     }
 }
-

@@ -32,4 +32,3 @@ void             cairo_move_rectangle     (cairo_surface_t *src,
                                            cairo_t         *cr,
                                            GdkRectangle    *from,
                                            GdkRectangle    *to);
-

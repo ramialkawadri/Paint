@@ -21,28 +21,27 @@
 #include "text.h"
 
 void
-on_text_draw_start_click (CanvasRegion *self,
+on_text_draw_start_click (CanvasRegion *canvas_region,
                           cairo_t      *cr,
                           DrawEvent    *draw_event)
 {
   GdkRectangle rect;
-  rect.x = draw_event->current.x;
-  rect.y = draw_event->current.y;
+  rect.x = draw_event->current_mouse_position.x;
+  rect.y = draw_event->current_mouse_position.y;
   rect.width = 0;
   rect.height = 0;
 
-  canvas_region_show_text_popover (self, &rect);
+  canvas_region_show_text_popover (canvas_region, &rect);
 }
 
 void
-on_text_draw (CanvasRegion *self,
+on_text_draw (CanvasRegion *canvas_region,
               cairo_t      *cr,
               DrawEvent    *draw_event)
 {
-  gchar *text = canvas_region_get_text_popover_text (self);
+  gchar *text = canvas_region_get_text_popover_text (canvas_region);
 
   cairo_set_font_size (cr, draw_event->draw_size * 1.33);
-  cairo_move_to (cr, draw_event->current.x, draw_event->current.y);
+  cairo_move_to (cr, draw_event->current_mouse_position.x, draw_event->current_mouse_position.y);
   cairo_show_text (cr, text);
 }
-

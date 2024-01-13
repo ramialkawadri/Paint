@@ -18,6 +18,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#pragma once
+
 #include <gtk/gtk.h>
 
-GdkRGBA WHITE_COLOR = { 1.0, 1.0, 1.0, 1.0 };
+extern GdkRGBA WHITE_COLOR;
+
+extern GdkRGBA SELECTION_RECTANGLE_COLOR;

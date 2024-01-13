@@ -20,16 +20,7 @@
 
 #include "utils/canvas-region-caretaker.h"
 
-static const gint MAX_NUMBER_OF_SNAPSHOTS = 16;
-
-struct _SnapshotNode;
 typedef struct _SnapshotNode SnapshotNode;
-
-struct _CanvasRegionCaretaker {
-  SnapshotNode *current;
-  SnapshotNode *head;
-  gint          length;
-};
 
 struct _SnapshotNode {
   SnapshotNode         *previous;
@@ -37,15 +28,13 @@ struct _SnapshotNode {
   CanvasRegionSnapshot *snapshot;
 };
 
-CanvasRegionCaretaker *
-canvas_region_caretaker_new (void)
-{
-  CanvasRegionCaretaker *obj = g_malloc (sizeof (CanvasRegionCaretaker));
-  obj->current = NULL;
-  obj->head = NULL;
-  obj->length = 0;
-  return obj;
-}
+struct _CanvasRegionCaretaker {
+  SnapshotNode *current;
+  SnapshotNode *head;
+  gint          length;
+};
+
+static const gint MAX_NUMBER_OF_SNAPSHOTS = 16;
 
 static SnapshotNode *
 snapshot_node_new (void)
@@ -79,6 +68,17 @@ free_all_next_nodes (SnapshotNode *node)
       snapshot_node_dispose (current);
       current = temp;
     }
+}
+
+
+CanvasRegionCaretaker *
+canvas_region_caretaker_new (void)
+{
+  CanvasRegionCaretaker *obj = g_malloc (sizeof (CanvasRegionCaretaker));
+  obj->current = NULL;
+  obj->head = NULL;
+  obj->length = 0;
+  return obj;
 }
 
 void

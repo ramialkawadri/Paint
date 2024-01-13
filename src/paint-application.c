@@ -28,18 +28,6 @@ struct _PaintApplication
 
 G_DEFINE_TYPE (PaintApplication, paint_application, ADW_TYPE_APPLICATION)
 
-PaintApplication *
-paint_application_new (const char       *application_id,
-                       GApplicationFlags flags)
-{
-  g_return_val_if_fail (application_id != NULL, NULL);
-
-  return g_object_new (PAINT_TYPE_APPLICATION,
-                       "application-id", application_id,
-                       "flags", flags,
-                       NULL);
-}
-
 static void
 paint_application_activate (GApplication *app)
 {
@@ -57,14 +45,6 @@ paint_application_activate (GApplication *app)
     }
 
   gtk_window_present (window);
-}
-
-static void
-paint_application_class_init (PaintApplicationClass *klass)
-{
-  GApplicationClass *app_class = G_APPLICATION_CLASS (klass);
-
-  app_class->activate = paint_application_activate;
 }
 
 static void
@@ -111,6 +91,15 @@ static const GActionEntry app_actions[] = {
 };
 
 static void
+paint_application_class_init (PaintApplicationClass *klass)
+{
+  GApplicationClass *app_class = G_APPLICATION_CLASS (klass);
+
+  app_class->activate = paint_application_activate;
+}
+
+
+static void
 paint_application_init (PaintApplication *self)
 {
   g_action_map_add_action_entries (G_ACTION_MAP (self),
@@ -137,4 +126,16 @@ paint_application_init (PaintApplication *self)
   gtk_application_set_accels_for_action (GTK_APPLICATION (self),
                                          "app.exit",
                                          (const char *[]){"<primary>w", NULL});
+}
+
+PaintApplication *
+paint_application_new (const char       *application_id,
+                       GApplicationFlags flags)
+{
+  g_return_val_if_fail (application_id != NULL, NULL);
+
+  return g_object_new (PAINT_TYPE_APPLICATION,
+                       "application-id", application_id,
+                       "flags", flags,
+                       NULL);
 }

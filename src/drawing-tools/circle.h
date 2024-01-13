@@ -23,6 +23,6 @@
 #include "canvas-region.h"
 #include "draw-event.h"
 
-void on_circle_draw (CanvasRegion *self,
+void on_circle_draw (CanvasRegion *canvas_region,
                      cairo_t      *cr,
                      DrawEvent    *draw_event);

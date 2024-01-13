@@ -18,9 +18,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#include "canvas-region.h"
 #include "paint-window.h"
 #include "toolbar.h"
-#include "canvas-region.h"
 
 #include "drawing-tools/drawing-tool-type.h"
 

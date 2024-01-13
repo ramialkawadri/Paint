@@ -34,4 +34,5 @@ void                   canvas_region_caretaker_save_snapshot        (CanvasRegio
 
 CanvasRegionSnapshot  *canvas_region_caretaker_previous_snapshot    (CanvasRegionCaretaker *self);
 CanvasRegionSnapshot  *canvas_region_caretaker_next_snapshot        (CanvasRegionCaretaker *self);
+
 void                   canvas_region_mark_current_snapshot_as_saved (CanvasRegionCaretaker *self);

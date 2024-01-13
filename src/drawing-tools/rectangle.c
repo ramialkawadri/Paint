@@ -21,17 +21,19 @@
 #include "rectangle.h"
 
 void
-on_rectangle_draw (CanvasRegion *self,
+on_rectangle_draw (CanvasRegion *canvas_region,
                    cairo_t      *cr,
                    DrawEvent    *draw_event)
 {
-  gdouble start_x = MIN (draw_event->current.x, draw_event->start.x);
-  gdouble start_y = MIN (draw_event->current.y, draw_event->start.y);
+  gdouble start_x;
+  gdouble start_y;
   gdouble width;
   gdouble height;
 
-  width = ABS (draw_event->current.x - draw_event->start.x);
-  height = ABS (draw_event->current.y - draw_event->start.y);
+  start_x = MIN (draw_event->current_mouse_position.x, draw_event->drag_start.x);
+  start_y = MIN (draw_event->current_mouse_position.y, draw_event->drag_start.y);
+  width = ABS (draw_event->current_mouse_position.x - draw_event->drag_start.x);
+  height = ABS (draw_event->current_mouse_position.y - draw_event->drag_start.y);
 
   cairo_set_line_width (cr, draw_event->draw_size);
 

@@ -23,6 +23,6 @@
 #include "canvas-region.h"
 #include "draw-event.h"
 
-void on_color_picker_draw_start_click (CanvasRegion *self,
+void on_color_picker_draw_start_click (CanvasRegion *canvas_region,
                                        cairo_t      *cr,
                                        DrawEvent    *draw_event);

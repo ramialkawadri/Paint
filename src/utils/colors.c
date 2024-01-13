@@ -1,4 +1,4 @@
-/* draw-event.h
+/* colors.c
  *
  * Copyright 2023 Rami Alkawadri
  *
@@ -18,20 +18,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#pragma once
+#include "colors.h"
 
-#include <glib.h>
-#include "utils/point.h"
+GdkRGBA WHITE_COLOR = { 1.0, 1.0, 1.0, 1.0 };
 
-typedef struct _DrawEvent
-{
-  Point    drag_start;
-  Point    drag_offset;
-  Point    last_drawn_point;
-  Point    current_mouse_position;
-  gint     draw_size;
-
-  /* Selection */
-  Point    selection_offset;
-  gboolean is_dragging_selection;
-} DrawEvent;
+GdkRGBA SELECTION_RECTANGLE_COLOR = { 0.125, 0.310, 0.537, 0.8};

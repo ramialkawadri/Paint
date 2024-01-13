@@ -21,7 +21,7 @@
 #include "circle.h"
 
 void
-on_circle_draw (CanvasRegion *self,
+on_circle_draw (CanvasRegion *canvas_region,
                 cairo_t      *cr,
                 DrawEvent    *draw_event)
 {
@@ -30,11 +30,11 @@ on_circle_draw (CanvasRegion *self,
   gdouble width;
   gdouble height;
 
-  width = ABS (draw_event->current.x - draw_event->start.x);
-  height = ABS (draw_event->current.y - draw_event->start.y);
+  width = ABS (draw_event->current_mouse_position.x - draw_event->drag_start.x);
+  height = ABS (draw_event->current_mouse_position.y - draw_event->drag_start.y);
 
-  x = (draw_event->start.x + draw_event->current.x) / 2;
-  y = (draw_event->start.y + draw_event->current.y) / 2;
+  x = (draw_event->drag_start.x + draw_event->current_mouse_position.x) / 2;
+  y = (draw_event->drag_start.y + draw_event->current_mouse_position.y) / 2;
 
   cairo_save (cr);
 
