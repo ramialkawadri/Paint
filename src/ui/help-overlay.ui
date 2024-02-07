@@ -40,7 +40,6 @@
         </child>
 
         <child>
-
           <object class="GtkShortcutsGroup">
             <property name="title" translatable="yes" context="shortcut window">Undo &amp; Redo</property>
 
@@ -55,6 +54,20 @@
               <object class="GtkShortcutsShortcut">
                 <property name="title" translatable="yes" context="shortcut window">Redo</property>
                 <property name="action-name">win.redo</property>
+              </object>
+            </child>
+
+          </object>
+        </child>
+
+        <child>
+          <object class="GtkShortcutsGroup">
+            <property name="title" translatable="yes" context="shortcut window">Selection</property>
+
+            <child>
+              <object class="GtkShortcutsShortcut">
+                <property name="title" translatable="yes" context="shortcut window">Select all</property>
+                <property name="action-name">win.select-all</property>
               </object>
             </child>
 

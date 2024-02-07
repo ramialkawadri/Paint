@@ -161,6 +161,15 @@ on_canvas_region_resize (CanvasRegion *canvas_region,
 }
 
 static void
+on_canvas_region_tool_change (CanvasRegion     *canvas_region,
+                              DRAWING_TOOL_TYPE selected_tool,
+                              gpointer          user_data)
+{
+  PaintWindow *self = user_data;
+  toolbar_set_selected_tool (self->toolbar, selected_tool);
+}
+
+static void
 undo_activated (GtkWidget  *widget,
                 const char *action_name,
                 GVariant   *parameter)
@@ -197,6 +206,15 @@ open_activated (GtkWidget  *widget,
 }
 
 static void
+select_all (GtkWidget  *widget,
+            const char *action_name,
+            GVariant   *parameter)
+{
+  PaintWindow *self = PAINT_WINDOW (widget);
+  canvas_region_select_all (self->canvas_region);
+}
+
+static void
 paint_window_class_init (PaintWindowClass *klass)
 {
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
@@ -218,12 +236,14 @@ paint_window_class_init (PaintWindowClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_file_save_status_change);
   gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_color_picked);
   gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_resize);
+  gtk_widget_class_bind_template_callback (widget_class, on_canvas_region_tool_change);
 
   /* Actions */
   gtk_widget_class_install_action (widget_class, "win.undo", NULL, undo_activated);
   gtk_widget_class_install_action (widget_class, "win.redo", NULL, redo_activated);
   gtk_widget_class_install_action (widget_class, "win.save", NULL, save_activated);
   gtk_widget_class_install_action (widget_class, "win.open", NULL, open_activated);
+  gtk_widget_class_install_action (widget_class, "win.select-all", NULL, select_all);
 
   /* Types */
   g_type_ensure (PAINT_TYPE_CANVAS_REGION);

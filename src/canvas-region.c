@@ -39,7 +39,9 @@
 enum {
   SAVE_STATUS_CHANGE,
   RESIZE,
+  // TODO: remove the D from the name
   COLOR_PICKED,
+  TOOL_CHANGE,
   NUMBER_OF_SIGNALS
 };
 
@@ -88,6 +90,12 @@ show_save_file_dialog (CanvasRegion       *self,
 G_DEFINE_FINAL_TYPE (CanvasRegion, canvas_region, GTK_TYPE_GRID);
 
 static guint canvas_region_signals [NUMBER_OF_SIGNALS];
+
+// Selection global variables
+static gdouble SELECTION_DASH_PATTERN[] = { 6 };
+static gint    SELECTION_LINE_WIDTH = 6;
+static gint    NUM_DASHES = 1;
+static gdouble DASH_OFFSET = 0;
 
 static void
 destroy_current_surface (CanvasRegion *self)
@@ -371,6 +379,8 @@ canvas_region_move_selection (CanvasRegion *self)
   cairo_move_rectangle (self->cairo_surface_save, cr,
                         &self->selection_rectangle, &self->selection_destination);
 
+  self->selection_rectangle = self->selection_destination;
+
   cairo_destroy (cr);
 }
 
@@ -402,11 +412,22 @@ on_mouse_press (GtkGestureClick *gesture,
 {
   CanvasRegion *self;
   cairo_t *cr;
+  Point click_point;
 
   self = user_data;
+  click_point.x = x;
+  click_point.y = y;
 
   if (self->draw_start_click_cb == NULL)
     return;
+
+  destroy_current_surface (self);
+
+  if (self->current_tool_type == SELECT &&
+          !point_is_inside_rectangle (&click_point, &self->selection_rectangle))
+    {
+      reset_selection (self);
+    }
 
   cr = cairo_create (self->cairo_surface_save);
 
@@ -518,10 +539,8 @@ on_gesture_drag_end (GtkGestureDrag *gesture,
 
   if (self->current_tool_type == SELECT)
     {
-      destroy_current_surface (self);
       canvas_region_move_selection (self);
       create_and_save_snapshot (self);
-      reset_selection (self);
       gtk_widget_queue_draw (GTK_WIDGET (self->drawing_area));
     }
   else
@@ -761,6 +780,17 @@ canvas_region_class_init (CanvasRegionClass *klass)
                                                       G_TYPE_NONE,
                                                       1,
                                                       GDK_TYPE_RGBA);
+
+  canvas_region_signals[TOOL_CHANGE] = g_signal_new ("tool-change",
+                                                     G_TYPE_FROM_CLASS (klass),
+                                                     G_SIGNAL_RUN_LAST,
+                                                     0,
+                                                     NULL,
+                                                     NULL,
+                                                     NULL,
+                                                     G_TYPE_NONE,
+                                                     1,
+                                                     G_TYPE_INT);
 
   /* Dispose */
   G_OBJECT_CLASS (klass)->dispose = canvas_region_dispose;
@@ -1035,8 +1065,45 @@ canvas_region_set_selection_rectangle (CanvasRegion *self,
 
 
 void
-canvas_region_set_selection_destnation (CanvasRegion *self,
-                                        GdkRectangle  dest)
+canvas_region_set_selection_destination (CanvasRegion *self,
+                                         GdkRectangle  dest)
 {
   self->selection_destination = dest;
+}
+
+void
+canvas_region_draw_selection_rectangle (CanvasRegion *self,
+                                        GdkRectangle *rect)
+{
+  cairo_t *cr;
+
+  if (self->cairo_surface == NULL)
+    self->cairo_surface = cairo_clone_surface (self->cairo_surface_save);
+
+  cr = cairo_create (self->cairo_surface);
+
+  gdk_cairo_set_source_rgba (cr, &SELECTION_RECTANGLE_COLOR);
+  cairo_set_line_width (cr, SELECTION_LINE_WIDTH);
+  cairo_set_dash (cr, SELECTION_DASH_PATTERN, NUM_DASHES, DASH_OFFSET);
+  cairo_rectangle (cr, rect->x, rect->y, rect->width, rect->height);
+  cairo_stroke (cr);
+  cairo_destroy (cr);
+
+  gtk_widget_queue_draw (GTK_WIDGET (self->drawing_area));
+}
+
+void
+canvas_region_select_all (CanvasRegion *self)
+{
+  // This must be called first because it resets the selection!
+  canvas_region_set_selected_tool (self, SELECT);
+  destroy_current_surface (self);
+
+  self->selection_rectangle.x = 0;
+  self->selection_rectangle.y = 0;
+  self->selection_rectangle.width = self->width;
+  self->selection_rectangle.height = self->height;
+
+  canvas_region_draw_selection_rectangle (self, &self->selection_rectangle);
+  g_signal_emit (self, canvas_region_signals[TOOL_CHANGE], 0, SELECT);
 }

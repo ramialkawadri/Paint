@@ -21,6 +21,7 @@
 #pragma once
 
 #include <gtk/gtk.h>
+#include "drawing-tools/drawing-tool-type.h"
 
 G_BEGIN_DECLS
 
@@ -28,10 +29,13 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (Toolbar, toolbar, PAINT, TOOLBAR, GtkBox)
 
-const GdkRGBA *toolbar_get_current_color       (Toolbar *self);
+const GdkRGBA *toolbar_get_current_color       (Toolbar          *self);
 
-gdouble        toolbar_get_draw_size           (Toolbar *self);
-void           toolbar_set_selected_color      (Toolbar *self,
-                                                GdkRGBA *color);
+gdouble        toolbar_get_draw_size           (Toolbar          *self);
+void           toolbar_set_selected_color      (Toolbar          *self,
+                                                GdkRGBA          *color);
+
+void           toolbar_set_selected_tool       (Toolbar          *self,
+                                                DRAWING_TOOL_TYPE tool);
 
 G_END_DECLS

@@ -74,7 +74,12 @@ void                canvas_region_emit_color_picked_signal    (CanvasRegion     
 GdkRectangle        canvas_region_get_selection_rectangle     (CanvasRegion       *self);
 void                canvas_region_set_selection_rectangle     (CanvasRegion       *self,
                                                                GdkRectangle        rect);
-void                canvas_region_set_selection_destnation    (CanvasRegion       *self,
+void                canvas_region_set_selection_destination   (CanvasRegion       *self,
                                                                GdkRectangle        dest);
+
+void                canvas_region_draw_selection_rectangle    (CanvasRegion       *self,
+                                                               GdkRectangle       *rect);
+
+void                canvas_region_select_all                  (CanvasRegion       *self);
 
 G_END_DECLS

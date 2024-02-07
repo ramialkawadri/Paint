@@ -111,6 +111,10 @@
                       handler="on_canvas_region_color_picked" object="PaintWindow"
                       swapped="no" />
 
+                    <signal name="tool_change"
+                      handler="on_canvas_region_tool_change" object="PaintWindow"
+                      swapped="no" />
+
                     <signal name="resize" handler="on_canvas_region_resize"
                       object="PaintWindow" swapped="no" />
                   </object>

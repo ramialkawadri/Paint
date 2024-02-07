@@ -263,3 +263,49 @@ toolbar_set_selected_color (Toolbar *self,
 {
   gtk_color_dialog_button_set_rgba (self->color_button, color);
 }
+
+void
+toolbar_set_selected_tool (Toolbar          *self,
+                           DRAWING_TOOL_TYPE tool)
+{
+  GtkButton *selected_tool;
+
+  gtk_widget_remove_css_class (GTK_WIDGET (self->currently_selected_button),
+                               SELECTED_TOOL_CSS_CLASS);
+
+  switch (tool) {
+    case BRUSH:
+      selected_tool = self->brush_button;
+      break;
+    case ERASER:
+      selected_tool = self->eraser_button;
+      break;
+    case RECTANGLE:
+      selected_tool = self->rectangle_button;
+      break;
+    case CIRCLE:
+      selected_tool = self->circle_button;
+      break;
+    case LINE:
+      selected_tool = self->line_button;
+      break;
+    case SELECT:
+      selected_tool = self->select_button;
+      break;
+    case TEXT:
+      selected_tool = self->text_button;
+      break;
+    case FILL:
+      selected_tool = self->fill_button;
+      break;
+    case COLOR_PICKER:
+      selected_tool = self->color_picker_button;
+      break;
+    default:
+      g_message ("Unknown tool %d", tool);
+      break;
+  }
+
+  self->currently_selected_button = selected_tool;
+  gtk_widget_add_css_class (GTK_WIDGET (selected_tool), SELECTED_TOOL_CSS_CLASS);
+}

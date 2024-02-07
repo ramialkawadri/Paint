@@ -19,25 +19,8 @@
  */
 
 #include "utils/cairo-utils.h"
-#include "utils/colors.h"
 #include "select.h"
 #include "cairo.h"
-
-static gdouble SELECTION_DASH_PATTERN[] = { 6 };
-static gint    SELECTION_LINE_WIDTH = 6;
-static gint    NUM_DASHES = 1;
-static gdouble DASH_OFFSET = 0;
-
-static void
-draw_selection_rectangle (cairo_t      *cr,
-                          GdkRectangle *rect)
-{
-  gdk_cairo_set_source_rgba (cr, &SELECTION_RECTANGLE_COLOR);
-  cairo_set_line_width (cr, SELECTION_LINE_WIDTH);
-  cairo_set_dash (cr, SELECTION_DASH_PATTERN, NUM_DASHES, DASH_OFFSET);
-  cairo_rectangle (cr, rect->x, rect->y, rect->width, rect->height);
-  cairo_stroke (cr);
-}
 
 static void
 move_selection (CanvasRegion *canvas_region,
@@ -67,9 +50,9 @@ move_selection (CanvasRegion *canvas_region,
 
   cairo_move_rectangle (cr_surface, cr, &selection_rect, &dest_rect);
 
-  draw_selection_rectangle (cr, &dest_rect);
+  canvas_region_draw_selection_rectangle (canvas_region, &dest_rect);
 
-  canvas_region_set_selection_destnation (canvas_region, dest_rect);
+  canvas_region_set_selection_destination (canvas_region, dest_rect);
 }
 
 void
@@ -114,9 +97,10 @@ on_select_draw (CanvasRegion *canvas_region,
     {
       move_selection (canvas_region, cr, draw_event);
     }
-  else
+  // Selection rectangle cannot be too small!
+  else if (selection_rect.width > 5 || selection_rect.height > 5)
     {
-      draw_selection_rectangle (cr, &selection_rect);
+      canvas_region_draw_selection_rectangle (canvas_region, &selection_rect);
       canvas_region_set_selection_rectangle (canvas_region, selection_rect);
     }
 }

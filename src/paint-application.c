@@ -124,6 +124,10 @@ paint_application_init (PaintApplication *self)
                                          (const char *[]){"<primary>r", NULL});
 
   gtk_application_set_accels_for_action (GTK_APPLICATION (self),
+                                         "win.select-all",
+                                         (const char *[]){"<primary>a", NULL});
+
+  gtk_application_set_accels_for_action (GTK_APPLICATION (self),
                                          "app.exit",
                                          (const char *[]){"<primary>w", NULL});
 }
